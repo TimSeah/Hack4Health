@@ -100,11 +100,13 @@ and avoid broad topic rewrites unless a change directly improves judging evidenc
    document escalation, returning-patient registration, and handoff summary.
 - [ ] Remaining draft placeholders: team details, approved cost assumptions, final GitHub URL, and
    demo-video URL.
-- [ ] PDF layout/export and final four-page verification remain outstanding.
+- [x] PDF exported as [TECHNICAL_TRACK_SUBMISSION.pdf](TECHNICAL_TRACK_SUBMISSION.pdf): four-page
+   A4 main body plus five appendix pages. All pages were raster-inspected; the Mermaid architecture
+   and contextual Copilot Studio screenshots are fully visible without clipping.
 
 ### Definition of submission-ready
 
-- [ ] Maximum-four-page Technical Track submission exported to PDF, excluding appendix.
+- [x] Maximum-four-page Technical Track submission exported to PDF, excluding appendix.
 - [ ] Team information and contact details supplied by the team.
 - [ ] Claims clearly distinguish live behavior, deterministic mock behavior, and production roadmap.
 - [x] At least five legible appendix screenshots cover the demonstrated journey and Evaluation results.

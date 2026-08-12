@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hack4Health 2026 - Technical Track Submission</title>
+<style>
+  @page { size: A4 portrait; margin: 9mm 11mm 10mm; }
+  * { box-sizing: border-box; }
+  html { background: #fff; }
+  body {
+    margin: 0;
+    color: #1f2933;
+    font-family: "Aptos", "Segoe UI", Arial, sans-serif;
+    font-size: 9pt;
+    line-height: 1.24;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  h1 { margin: 0 0 2.5mm; color: #075985; font-size: 18pt; line-height: 1.05; }
+  h2 {
+    margin: 0 0 2mm;
+    padding-bottom: 1mm;
+    color: #075985;
+    border-bottom: 1.5px solid #0ea5a4;
+    font-size: 13pt;
+    line-height: 1.1;
+    break-after: avoid;
+  }
+  h3 { margin: 2.2mm 0 1mm; color: #0f4c5c; font-size: 10.5pt; line-height: 1.12; break-after: avoid; }
+  p { margin: 1.25mm 0; }
+  strong { color: #111827; }
+  ul, ol { margin: 1mm 0 1.5mm 4mm; padding-left: 3.5mm; }
+  li { margin: 0.45mm 0; }
+  table {
+    width: 100%;
+    margin: 1.3mm 0 1.8mm;
+    border-collapse: collapse;
+    font-size: 7.6pt;
+    line-height: 1.18;
+    break-inside: avoid;
+  }
+  th, td { padding: 1.05mm 1.25mm; border: 0.6px solid #b8c4cc; vertical-align: top; }
+  th { color: #0f3d4c; background: #eaf6f6; font-weight: 700; }
+  tr:nth-child(even) td { background: #f8fafb; }
+  code { font-family: "Cascadia Mono", Consolas, monospace; font-size: 0.92em; color: #075985; }
+  blockquote { margin: 2mm 0; padding: 1.5mm 2.5mm; border-left: 3px solid #0ea5a4; background: #f0fdfa; }
+  a { color: #075985; text-decoration: none; }
+  .architecture-figure {
+    margin: 1.5mm 0 1.8mm;
+    padding: 1.5mm;
+    border: 0.7px solid #b8c4cc;
+    background: #fff;
+    break-inside: avoid;
+  }
+  .architecture-figure img { display: block; width: 100%; height: auto; max-height: 72mm; object-fit: contain; }
+  figcaption { margin-top: 0.8mm; color: #52616b; font-size: 7pt; text-align: center; }
+  .equation {
+    margin: 1.5mm auto;
+    padding: 1.4mm 2mm;
+    border: 0.7px solid #99c8c8;
+    border-radius: 2px;
+    background: #f0fdfa;
+    color: #12343b;
+    font-size: 8.4pt;
+    text-align: center;
+    break-inside: avoid;
+  }
+  div[style*="page-break-after"] { height: 0; break-after: page; page-break-after: always; }
+  .appendix-break { height: 0; break-before: page; page-break-before: always; }
+  img { max-width: 100%; height: auto; }
+  .appendix-title + p { break-after: avoid; }
+  .appendix-figure { margin: 2mm 0 0; break-inside: avoid; page-break-inside: avoid; }
+  .appendix-figure h3 { margin-top: 0; }
+  .appendix-figure img { display: block; max-height: 210mm; margin: 1.5mm auto 0; object-fit: contain; }
+  body > p:last-child { margin-top: 2mm; padding: 1.5mm 2mm; background: #fff7ed; border-left: 3px solid #f59e0b; }
+</style>
+</head>
+<body>
+<h1>Hack4Health 2026 - Technical Track Submission</h1>
+<h2>Page 1 of 4 - Team, Problem and Solution</h2>
+<h3>1. Team Information</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Team name</td>
+<td><strong>[Team Name]</strong></td>
+</tr>
+<tr>
+<td>Institution</td>
+<td><strong>[Institution]</strong></td>
+</tr>
+<tr>
+<td>Members</td>
+<td><strong>Member 1; Member 2; Member 3; Member 4</strong></td>
+</tr>
+<tr>
+<td>Contact person</td>
+<td><strong>[Name and email]</strong></td>
+</tr>
+</tbody></table>
+<h3>2. Executive Summary</h3>
+<p>Clinic registration is slowed less by identity checking than by the administrative work around it:
+staff interpret inconsistent referral or insurer documents, search for patient records, determine
+eligibility and screening packages, repeat information across forms, estimate billing, and prepare a
+queue entry. The challenge brief estimates 23-32 minutes of administrative work per patient.</p>
+<p><strong>ClinicPrep Assistant</strong> is a Microsoft Copilot Studio prototype that moves these tasks before the
+counter while retaining the two steps that must remain physical: identity verification and e-card or
+insurance-card validation. A patient selects the visit type, supplies a referral or voucher, confirms
+pre-filled registration details, completes a focused health questionnaire, receives a billing estimate,
+and obtains a handoff reference. Unclear documents, missing eligibility context, declined consent, and
+medical questions are escalated rather than guessed.</p>
+<p>The live prototype contains nine enabled, error-free topics, curated synthetic knowledge, Entra ID
+authentication, and two eight-case Evaluation sets. Five external actions are represented by typed,
+deterministic mocks because production connectors were unavailable; the architecture replaces these
+with Power Automate and Dataverse. The corrected Core Conversations run and Safety Boundaries run each
+scored 63% under General quality. Three conversation failures reflect intentional safety escalation,
+not fabricated answers. The result is a credible, human-supervised prototype with a practical path to a
+controlled clinic pilot.</p>
+<h3>3. Problem Understanding</h3>
+<p>The current counter workflow is sequential and fragmented. Staff re-enter registration details, read
+non-standard medical chits and TPA authorisations, identify the correct corporate or insurer code, match
+packages, determine payment, and later re-key visit information into insurer portals. Screening
+patients also repeat known details in General or Occupational Health questionnaires. For 40 patients in
+a morning, the brief estimates about 18 cumulative staff-hours of administrative effort.</p>
+<p>The root causes are:</p>
+<ul>
+<li>heterogeneous documents and coding schemes;</li>
+<li>disconnected patient, eligibility, questionnaire, billing, and TPA systems;</li>
+<li>administrative processing beginning only when the patient reaches the counter;</li>
+<li>duplicate data collection and no reusable, structured handoff record; and</li>
+<li>safety-critical identity and card checks being mixed with automatable clerical work.</li>
+</ul>
+<p>The design therefore automates preparation, not approval. Staff retain authority over identity,
+eligibility, coverage, billing, and correction of exceptions.</p>
+<h3>4. Proposed AI Solution</h3>
+<p>ClinicPrep Assistant supports scheduled and walk-in GP, General Health Screening, and Occupational
+Health Screening journeys. Its innovation is a single pre-arrival conversation that transforms varied
+inputs into a structured <strong>pending-verification visit record</strong>. Fixed topics control consent, safety,
+and handoff; generative orchestration handles natural-language routing and explanation.</p>
+<p>The patient experience is concise: provide or upload once, confirm reused data, answer only missing
+questions, and arrive with a reference. The staff experience is a summary of claimed identity, source
+document, package, estimated payable amount, allergies and outstanding checks. Low-confidence or
+missing-context cases enter a review path instead of receiving a guessed answer.</p>
+<div style="page-break-after: always;"></div><h2>Page 2 of 4 - Workflow and Technical Architecture</h2>
+<h3>5. User Journey and Workflow</h3>
+<ol>
+<li><strong>Route the visit.</strong> Capture GP Consultation, General Health Screening, or Occupational Health
+Screening and whether a document is available.</li>
+<li><strong>Interpret the document.</strong> Extract company/TPA code, policy number, patient details, requested
+package, dates, and confidence. Low confidence routes to staff review.</li>
+<li><strong>Pre-fill registration.</strong> Look up the claimed NRIC/FIN or passport and ask only for missing or
+changed details. The physical identity check remains at the clinic.</li>
+<li><strong>Match eligibility and package.</strong> Apply curated coverage rules using visit type and relevant
+demographics. Ambiguous or absent context routes to staff.</li>
+<li><strong>Complete the questionnaire.</strong> Reuse registration data and collect visit-relevant medical,
+family, lifestyle, allergy, and occupational information, followed by PDPA acknowledgement.</li>
+<li><strong>Estimate billing.</strong> Explain covered and patient-payable amounts as estimates pending staff
+verification.</li>
+<li><strong>Create the handoff.</strong> Give the patient a reference and provide staff a structured record marked
+<code>Pending Verification</code>.</li>
+<li><strong>Verify in person.</strong> Staff inspect identity and the e-card/insurance card, resolve flags, and only
+then confirm the visit in the clinic system.</li>
+</ol>
+<h3>6. Technical Architecture</h3>
+<p>The diagram below is the <strong>target pilot architecture</strong>. The current hackathon prototype implements
+the Copilot Studio and knowledge layers; its five action boundaries are deterministic mocks.</p>
+<figure class="architecture-figure">
+<img src="SubmissionAssets/architecture-pilot.svg" alt="Target pilot architecture connecting patients, ClinicPrep Assistant, Power Automate flows, Dataverse, staff verification, Clinic Assist and NEHR">
+<figcaption>Target pilot architecture. The hackathon prototype implements the Copilot Studio and knowledge layers; action boundaries are deterministic mocks.</figcaption>
+</figure><table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Prototype</th>
+<th>Pilot/production path</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Conversation</td>
+<td>Copilot Studio generative orchestration plus nine classic topics</td>
+<td>Stable, organisation-approved model with fixed compliance topics</td>
+</tr>
+<tr>
+<td>Knowledge</td>
+<td>Parkway Shenton website, synthetic records, questionnaire reference, sample chits</td>
+<td>Versioned, approved package and policy knowledge</td>
+</tr>
+<tr>
+<td>Document parsing</td>
+<td>Typed EVWPA/WELL2 mock with confidence branch</td>
+<td>Power Automate plus Azure AI Document Intelligence or approved multimodal model</td>
+</tr>
+<tr>
+<td>Patient/eligibility</td>
+<td>Deterministic found/not-found and package mocks</td>
+<td>Power Automate querying Dataverse/approved clinic APIs</td>
+</tr>
+<tr>
+<td>Billing</td>
+<td>Deterministic covered/payable record</td>
+<td>Rules flow using versioned package and coverage tables</td>
+</tr>
+<tr>
+<td>Handoff</td>
+<td>Deterministic reference</td>
+<td>Dataverse <code>VisitTicket</code>, staff queue, timestamp and audit record</td>
+</tr>
+<tr>
+<td>Security</td>
+<td>Microsoft Entra ID; multi-tenant access disabled</td>
+<td>Least-privilege service principals, row-level access and retention controls</td>
+</tr>
+</tbody></table>
+<p>The proposed Dataverse model contains <code>Patients</code>, <code>CoverageRules</code>, <code>Questionnaires</code>, <code>VisitTickets</code>,
+and <code>AuditLog</code>. Each action records timestamp, action, minimum necessary input summary, confidence,
+outcome, and rule/model version. Raw identifiers should not be copied into logs unnecessarily.</p>
+<p><strong>Clinic Assist/NEHR boundary:</strong> after staff verification, an approved connector may create or update
+the administrative visit in Clinic Assist. The bot does not write directly to NEHR or create clinical
+facts. Any NEHR exchange remains within authorised clinical workflows after human confirmation.</p>
+<h3>Prototype evidence and limitations</h3>
+<p>The nine required topics are enabled with no listed topic errors. The prototype demonstrates document
+confirmation, returning and new-patient registration, safe escalation, questionnaire branching,
+billing, and handoff using synthetic data. It is not yet published, has no live agent tools, and uses
+representative questionnaire fields. These are disclosed limitations, not production claims.</p>
+<div style="page-break-after: always;"></div><h2>Page 3 of 4 - Operational Impact and Feasibility</h2>
+<h3>7. Operational Impact</h3>
+<p>The challenge baseline is <strong>23-32 administrative minutes per patient</strong>. Within that total, registration,
+document interpretation, eligibility, package verification, and billing account for approximately
+10-19 counter minutes. ClinicPrep Assistant moves most preparation before arrival, leaving staff to
+verify identity/card, review the summary, and handle exceptions.</p>
+<p>Because the current implementation is a prototype, the following are <strong>pilot targets</strong>, not measured
+outcomes:</p>
+<table>
+<thead>
+<tr>
+<th>Pilot measure</th>
+<th>Baseline</th>
+<th>Conservative target/hypothesis</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Counter time for in-scope preparation</td>
+<td>10-19 min</td>
+<td>Reduce by 6-10 min for successfully pre-registered patients</td>
+</tr>
+<tr>
+<td>Staff effort for 40 completed pre-registrations</td>
+<td>Not separated from 18-hour total</td>
+<td>Avoid 240-400 minutes, or <strong>4.0-6.7 staff-hours</strong>, per morning</td>
+</tr>
+<tr>
+<td>Duplicate entry</td>
+<td>Registration, forms and TPA re-keying</td>
+<td>Reuse one verified <code>VisitTicket</code>; measure fields re-keyed per visit</td>
+</tr>
+<tr>
+<td>Package/billing corrections</td>
+<td>Not supplied</td>
+<td>Track mismatch and override rates before and after pilot</td>
+</tr>
+<tr>
+<td>Safety</td>
+<td>Manual interpretation risk</td>
+<td>100% staff confirmation; 100% low-confidence cases escalated</td>
+</tr>
+</tbody></table>
+<p>Pilot evaluation should measure median and 90th-percentile counter time, completion/abandonment,
+percentage of fields pre-filled, staff overrides, false package matches, escalation rate, and patient
+and staff satisfaction. A matched baseline period is required before claiming realised savings.</p>
+<p>For 40 patients, the calculation is:</p>
+<div class="equation">40 patients x 6-10 minutes saved = 240-400 minutes = <strong>4.0-6.7 staff-hours</strong></div><h3>Cost and operational viability</h3>
+<p>The architecture controls cost by using deterministic rules for eligibility and billing, reserving AI
+for document interpretation and conversational assistance. It reuses Microsoft Power Platform rather
+than adding a separate application stack. Before pilot approval, the team will validate Copilot Studio
+licensing, Power Automate premium connectors, Dataverse capacity, document-processing volume, support,
+and security-review cost against the following break-even model:</p>
+<div class="equation"><strong>Monthly benefit</strong> = (patients x adoption x minutes saved / 60) x loaded staff hourly cost</div><p>A pilot proceeds only if measured operational benefit, safety and patient experience justify the
+platform and implementation cost. <strong>Pricing and loaded staff-cost assumptions: [confirm with sponsor].</strong></p>
+<h3>8. Feasibility, Resources and Delivery</h3>
+<p>The prototype demonstrates that the workflow fits Copilot Studio topics, variables, knowledge,
+Evaluation, authentication, and Power Platform integration boundaries. The main dependencies are
+access to approved clinic/TPA interfaces, authoritative coverage rules, a privacy/security review,
+clinical and operations sign-off, and tenant permissions for tools and channels.</p>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Indicative duration</th>
+<th>Deliverable</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Hackathon</td>
+<td>Complete</td>
+<td>Synthetic-data prototype, nine topics, safety paths and Evaluation evidence</td>
+</tr>
+<tr>
+<td>Hardening</td>
+<td>2-4 weeks</td>
+<td>Stable model/settings, complete priority fields, accessibility review and test channel</td>
+</tr>
+<tr>
+<td>Integration</td>
+<td>4-8 weeks</td>
+<td>Five flows, Dataverse tables, audit logging and sandbox clinic-system interface</td>
+</tr>
+<tr>
+<td>Limited pilot</td>
+<td>8-12 weeks</td>
+<td>One or two clinics, trained staff, monitored KPIs and rollback process</td>
+</tr>
+<tr>
+<td>Scale decision</td>
+<td>After evidence review</td>
+<td>Expand rules, languages and clinics only if safety/ROI thresholds are met</td>
+</tr>
+</tbody></table>
+<p>Indicative pilot team: product/operations owner, Copilot Studio/Power Platform engineer, integration
+engineer, clinic subject-matter expert, privacy/security reviewer, and part-time UX/accessibility
+support.</p>
+<div style="page-break-after: always;"></div><h2>Page 4 of 4 - Governance, Scalability and Recommendation</h2>
+<h3>9. Governance and Safety</h3>
+<ul>
+<li><strong>Human authority:</strong> the assistant prepares drafts only. Identity, e-card, eligibility, coverage and
+billing remain pending until staff confirmation.</li>
+<li><strong>Hallucination control target:</strong> use approved knowledge and versioned rules; disable
+ ungrounded/public-web responses; route low-confidence or missing-context cases to staff.</li>
+<li><strong>Clinical boundary:</strong> do not diagnose, interpret results or advise medication changes. Urgent
+symptoms receive appropriate emergency/urgent-care direction and human escalation.</li>
+<li><strong>Consent and PDPA:</strong> explain purpose, minimise collection, capture acknowledgement before storage,
+and stop the automated path when consent is declined.</li>
+<li><strong>Security:</strong> Entra ID authentication, single-tenant access, least-privilege connectors, per-clinic
+row security, encryption, environment separation and approved retention/deletion periods.</li>
+<li><strong>Auditability:</strong> record the action, timestamp, confidence, rule/model version, output and human
+override without duplicating unnecessary identifiers.</li>
+<li><strong>Operational controls:</strong> staff training, exception queue, monitoring, incident response, rollback,
+periodic rule review and a named owner for coverage-table changes.</li>
+</ul>
+<p>The current prototype already enforces pending-verification language and safe escalation. Its live
+configuration still uses GPT-5 Auto (Preview), Low moderation, ungrounded responses and public web
+search. Before judging/pilot use, it must move to an approved stable model, strengthen moderation,
+disable ungrounded/public-web answers, connect a real audit trail, and validate all patient-facing
+safety text.</p>
+<h3>10. Scalability Across Parkway Shenton and IHH</h3>
+<p>The design separates reusable orchestration from local configuration. A centrally governed
+<code>CoverageRules</code> service can version insurer, TPA, employer and package mappings while each clinic owns
+its staff queue, operating hours and escalation contacts. Dataverse records are partitioned by clinic
+with role-based access; common topics and test suites are packaged as managed solutions and promoted
+through development, test and production environments.</p>
+<p>Scale occurs in controlled stages: one workflow and clinic, then additional packages, clinics and
+languages after threshold review. Singapore English and local phone/address formats are prioritised
+for the pilot, followed by Chinese, Malay and Tamil where validated translations and support processes
+exist. New insurer or occupational rules require an owner, source, effective date, regression cases and
+rollback version.</p>
+<p>This configuration-driven approach supports Parkway Shenton first and wider IHH adoption without
+allowing one clinic&#39;s data or unapproved rules to leak into another. Capacity, latency, completion,
+escalation and override metrics are monitored by clinic and package.</p>
+<h3>11. Current Evidence and Next Decision</h3>
+<p>The corrected mock Evaluation produced <strong>5/8 passes (62.5%, displayed as 63%)</strong> for Core Conversations
+and <strong>5/8 passes (62.5%, displayed as 63%)</strong> for Safety Boundaries. Both registration cases, the
+principal document path, full mock path and
+occupational branch passed. Three conversation failures were intentional refusal/escalation cases that
+General quality treated as non-answers; this behavior should be judged against explicit safety criteria,
+not weakened to optimise a generic score. Two genuine safety wording gaps are being corrected and
+retested.</p>
+<p>ClinicPrep Assistant demonstrates that pre-registration can be orchestrated safely in Copilot Studio
+while keeping physical verification with staff. The recommendation is a limited, synthetic/sandbox
+pilot focused on measurable counter-time reduction, data quality, override rates and safe escalation.
+Production deployment is contingent on real integrations, governance approval and evidence from that
+pilot.</p>
+<div class="appendix-break"></div><h2 class="appendix-title">Appendix - Prototype Evidence</h2><p>Appendix material does not count toward the four-page main body.</p>
+<section class="appendix-figure"><h3>Figure A1 - Topic health and conflict isolation</h3>
+<p>Required topics are enabled with blank error/blocked columns; overlapping legacy topics shown in
+the table are disabled.</p>
+<p><img src="SubmissionAssets/A1-topics-enabled.png" alt="Copilot Studio topic table showing enabled project topics and disabled legacy topics"></p>
+</section>
+<section class="appendix-figure"><h3>Figure A2 - Corrected Core Conversations Evaluation</h3>
+<p>Run <code>260812_1543</code>: 63% (5 pass, 3 fail) after the registration redirect defect was removed.</p>
+<p><img src="SubmissionAssets/A2-core-evaluation-63.png" alt="Core Conversations Evaluation result showing five passes and three failures"></p>
+</section>
+<section class="appendix-figure"><h3>Figure A3 - Safety Boundaries Evaluation</h3>
+<p>Run <code>260812_1532</code>: 63% (5 pass, 3 fail), including successful identity, billing, PDPA-purpose,
+human-handoff, and counter-workflow boundaries.</p>
+<p><img src="SubmissionAssets/A3-safety-evaluation-63.png" alt="Safety Boundaries Evaluation result showing responses and score"></p>
+</section>
+<section class="appendix-figure"><h3>Figure A4 - Safe document escalation</h3>
+<p>The assistant refuses to guess from an ambiguous document and routes it to staff. General quality
+labels the required refusal as a failure, illustrating why explicit safety criteria are needed.</p>
+<p><img src="SubmissionAssets/A4-safe-document-escalation.png" alt="Conversation detail showing refusal to guess an ambiguous package and staff escalation"></p>
+</section>
+<section class="appendix-figure"><h3>Figure A5 - Returning-patient registration</h3>
+<p>The synthetic returning-patient path finds the existing record and proceeds without an external
+connector error.</p>
+<p><img src="SubmissionAssets/A5-returning-patient-registration.png" alt="Conversation detail showing returning-patient registration path"></p>
+</section>
+<section class="appendix-figure"><h3>Figure A6 - Staff handoff contract</h3>
+<p>The Handoff Summary topic produces <code>MOCK-H4H-001</code> and explicitly retains in-person identity and
+e-card/insurance-card verification.</p>
+<p><img src="SubmissionAssets/A6-handoff-summary.png" alt="Handoff Summary topic showing queue reference and pending in-person verification notice"></p>
+</section>
+<ul>
+<li>Repository evidence: <a href="AUDIT.md">AUDIT.md</a>, <a href="TEST_CASE.md">TEST_CASE.md</a>, <a href="FLOW.md">FLOW.md</a>,
+<a href="PLAN.md">PLAN.md</a>, and <a href="CopilotStudio/">CopilotStudio/</a>.</li>
+</ul>
+<blockquote>
+<p>Draft placeholders to resolve before submission: team details, sponsor-approved pricing/staff-cost
+assumptions, final GitHub URL, and demo-video URL.</p>
+</blockquote>
+
+</body>
+</html>
