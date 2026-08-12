@@ -1,0 +1,109 @@
+# Consent Questionnaire Pre-fill — plan §3.6
+# New topic. Paste this whole file into the topic's code editor.
+# Full field lists: Data/Parkway_Shenton_Questionnaires_Field_Reference.md
+# (only a representative subset is included below — clone the Question
+# pattern for the remaining fields per visit type).
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    triggerQueries:
+      - fill in my health questionnaire
+      - medical history questions
+      - occupational health questionnaire
+  actions:
+    - kind: ConditionGroup
+      id: branchByVisitType
+      conditions:
+        - id: generalHealthBranch
+          condition: =Global.VisitType = "General Health Screening"
+          actions:
+            - kind: Question
+              id: askExistingConditions
+              alwaysPrompt: true
+              variable: Topic.HasExistingConditions
+              prompt: "Have you been diagnosed with any of the following: diabetes, high blood pressure, high cholesterol, heart disease, or asthma?"
+              entity: BooleanPrebuiltEntity
+
+            - kind: Question
+              id: askExistingConditionsDetail
+              alwaysPrompt: false
+              variable: Topic.ExistingConditionsDetail
+              prompt: "Please list the condition(s) and roughly when they were diagnosed."
+              entity: StringPrebuiltEntity
+
+            - kind: Question
+              id: askFamilyHistory
+              alwaysPrompt: true
+              variable: Topic.FamilyHistory
+              prompt: "Does anyone in your immediate family have a history of heart disease, diabetes, or cancer?"
+              entity: StringPrebuiltEntity
+
+            - kind: Question
+              id: askLifestyleSmoking
+              alwaysPrompt: true
+              variable: Topic.SmokingStatus
+              prompt: "Do you currently smoke, used to smoke, or have never smoked?"
+              entity: StringPrebuiltEntity
+
+            - kind: Question
+              id: askLifestyleAlcohol
+              alwaysPrompt: true
+              variable: Topic.AlcoholUse
+              prompt: "How often would you say you drink alcohol — never, occasionally, or regularly?"
+              entity: StringPrebuiltEntity
+
+        - id: occupationalHealthBranch
+          condition: =Global.VisitType = "Occupational Health Screening"
+          actions:
+            - kind: Question
+              id: askOccExistingConditions
+              alwaysPrompt: true
+              variable: Topic.HasExistingConditions
+              prompt: "Do you have any existing medical conditions relevant to your work duties?"
+              entity: BooleanPrebuiltEntity
+
+            - kind: Question
+              id: askSmokingStatusOcc
+              alwaysPrompt: true
+              variable: Topic.SmokingStatus
+              prompt: "Do you currently smoke, used to smoke, or have never smoked?"
+              entity: StringPrebuiltEntity
+
+            - kind: Question
+              id: askHazardTypes
+              alwaysPrompt: true
+              variable: Topic.HazardTypes
+              prompt: "Which of these are you regularly exposed to at work: noise, chemicals, dust/respiratory hazards, working at height, confined spaces, or manual handling? You can select more than one."
+              entity: StringPrebuiltEntity
+
+    # --- PDPA declaration (fixed / compliance-critical step, plan §8) ---
+    - kind: SendActivity
+      id: sendPdpaDeclaration
+      activity: "Declaration: The information I've provided is true and accurate to the best of my knowledge. I understand it will be used only for my healthcare and administrative purposes at this visit, in accordance with the clinic's PDPA policy."
+
+    - kind: Question
+      id: askPdpaAcknowledged
+      alwaysPrompt: true
+      variable: Topic.PdpaAcknowledged
+      prompt: "Do you acknowledge this declaration? (This acknowledgement is captured in place of a physical signature.)"
+      entity: BooleanPrebuiltEntity
+
+    - kind: ConditionGroup
+      id: checkPdpaAcknowledged
+      conditions:
+        - id: notAcknowledgedBranch
+          condition: =Topic.PdpaAcknowledged = false
+          actions:
+            - kind: SendActivity
+              id: sendPdpaDeclineNotice
+              activity: "No problem — a staff member will go through this with you in person before we can proceed."
+            - kind: BeginDialog
+              id: redirectToEscalationOnDecline
+              dialog: 5d869520-458f-4616-94fb-1e6ad5ab1f97
+
+    # On acknowledgement, continues to "Billing Estimate" (plan §3.6 → §3.7).
+    - kind: BeginDialog
+      id: redirectToBillingEstimate
+      dialog: ea5b2fc8-a9ba-411c-a61b-63b30c357940

@@ -1,0 +1,58 @@
+# Billing Estimate — plan §3.7
+# New topic. Paste this whole file into the topic's code editor.
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    triggerQueries:
+      - how much will this cost
+      - is this fully covered
+      - what's my out-of-pocket cost
+  actions:
+    # --- Call the "Billing Calculation" action (plan §5) ---
+    # Replace the placeholder URL, or (recommended) swap this node for the
+    # published flow added as a Tool action — see CopilotStudio/README.md.
+    - kind: HttpRequestAction
+      id: callBillingCalculation
+      method: POST
+      url: "https://REPLACE-ME.azurewebsites.net/api/billing-calculation"
+      headers:
+        Content-Type: application/json
+      body:
+        kind: JsonRequestContent
+        content:
+          matchedPackageCode: =Global.MatchedPackageCode
+          coverageRuleSummary: =Global.CoverageRuleSummary
+      response: Topic.BillingResult
+      responseSchema:
+        kind: Record
+        properties:
+          coveredAmount: Number
+          payableAmount: Number
+          currency: String
+
+    - kind: SetMultipleVariables
+      id: storeBillingResult
+      variables:
+        Global.PayableAmount: =Topic.BillingResult.payableAmount
+        Global.BillingCurrency: =Topic.BillingResult.currency
+
+    - kind: ConditionGroup
+      id: checkOutOfPocketCost
+      conditions:
+        - id: fullyCoveredBranch
+          condition: =Topic.BillingResult.payableAmount = 0
+          actions:
+            - kind: SendActivity
+              id: sendFullyCoveredEstimate
+              activity: =Concat("Your ", Global.MatchedPackageName, " is fully covered. No out-of-pocket cost is expected (pending verification).")
+      elseActions:
+        - kind: SendActivity
+          id: sendPartialCostEstimate
+          activity: =Concat("Estimated out-of-pocket cost for your ", Global.MatchedPackageName, ": ", Topic.BillingResult.currency, " ", Topic.BillingResult.payableAmount, " (pending verification).")
+
+    # Always continues to "Handoff Summary" (plan §3.7 → §3.8).
+    - kind: BeginDialog
+      id: redirectToHandoffSummary
+      dialog: 798f70c7-e80f-4b6a-a872-79610b04ca83

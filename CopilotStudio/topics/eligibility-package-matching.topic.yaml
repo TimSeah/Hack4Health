@@ -1,0 +1,71 @@
+# Eligibility & Package Matching — plan §3.5
+# New topic. Paste this whole file into the topic's code editor.
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    triggerQueries:
+      - what's covered
+      - check my eligibility
+      - what package am I on
+      - is this covered by my insurance
+  actions:
+    # --- Call the "Eligibility Lookup" action (plan §5) ---
+    # Replace the placeholder URL, or (recommended) swap this node for the
+    # published flow added as a Tool action — see CopilotStudio/README.md.
+    - kind: HttpRequestAction
+      id: callEligibilityLookup
+      method: POST
+      url: "https://REPLACE-ME.azurewebsites.net/api/eligibility-lookup"
+      headers:
+        Content-Type: application/json
+      body:
+        kind: JsonRequestContent
+        content:
+          companyOrTpaCode: =Global.CompanyOrTPACode
+          packageCodeRequested: =Global.PackageCode
+          visitType: =Global.VisitType
+          dateOfBirth: =Global.DateOfBirth
+          gender: =Global.Gender
+      response: Topic.EligibilityResult
+      responseSchema:
+        kind: Record
+        properties:
+          matchFound: Boolean
+          matchedPackageCode: String
+          matchedPackageName: String
+          coverageRuleSummary: String
+          confidenceScore: Number
+
+    - kind: ConditionGroup
+      id: checkEligibilityMatch
+      conditions:
+        - id: matchFoundBranch
+          condition: =And(Topic.EligibilityResult.matchFound = true, Topic.EligibilityResult.confidenceScore >= 0.8)
+          actions:
+            - kind: SetMultipleVariables
+              id: storeMatchedPackage
+              variables:
+                Global.MatchedPackageCode: =Topic.EligibilityResult.matchedPackageCode
+                Global.MatchedPackageName: =Topic.EligibilityResult.matchedPackageName
+                Global.CoverageRuleSummary: =Topic.EligibilityResult.coverageRuleSummary
+
+            - kind: SendActivity
+              id: sendMatchSummary
+              activity: |-
+                Based on your details, you match: {Topic.EligibilityResult.matchedPackageName}
+                ({Topic.EligibilityResult.matchedPackageCode}). {Topic.EligibilityResult.coverageRuleSummary}
+                (pending staff verification).
+      elseActions:
+        - kind: SendActivity
+          id: sendNoMatchNotice
+          activity: "I couldn't confidently match your coverage or package, so I'll flag this for a staff member to check rather than guess."
+        # No match / ambiguous match: flag for staff review rather than guessing.
+        - kind: BeginDialog
+          id: redirectToEscalationOnNoMatch
+          dialog: 5d869520-458f-4616-94fb-1e6ad5ab1f97
+
+    # On a match, continues to "Consent Questionnaire Pre-fill" (plan §3.5 →
+    # §3.6), either via generative orchestration or an explicit BeginDialog
+    # redirect.

@@ -1,0 +1,11 @@
+# Large media / recordings - do not commit
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.wmv
+*.m4v
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db

@@ -1,0 +1,45 @@
+# Greeting (system topic, customized) — plan §3.1
+# Paste into: Topics > System > Greeting > (...) More > Open code editor.
+# Purpose: ask visit type + whether the patient has a document, then let the
+# agent's generative orchestration hand off to "Visit Type Router" / "Document
+# Intake & Interpretation" based on the answers and the user's next message.
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnConversationStart
+  id: main
+  actions:
+    - kind: SendActivity
+      id: sendWelcome
+      activity: "Hi, I'm ClinicPrep Assistant. I'll help get your visit ready before you reach the registration counter. Your identity and any insurance/e-card will still be checked in person by our staff — I only prepare things ahead of time."
+
+    - kind: Question
+      id: askVisitType
+      alwaysPrompt: true
+      variable: Global.VisitType
+      prompt: "Is today's visit for a GP consultation, a general health screening, or an occupational health screening?"
+      entity: StringPrebuiltEntity
+
+    - kind: Question
+      id: askHasDocument
+      alwaysPrompt: true
+      variable: Global.HasDocument
+      prompt: "Do you have a referral letter, insurance voucher, TPA authorisation form, HR email, or e-card to share?"
+      entity: BooleanPrebuiltEntity
+
+    - kind: ConditionGroup
+      id: routeAfterGreeting
+      conditions:
+        - id: hasDocumentBranch
+          condition: =Global.HasDocument = true
+          actions:
+            - kind: SendActivity
+              id: sendUploadPrompt
+              activity: "Great — please upload the file, or paste the text of it, and I'll read it."
+      elseActions:
+        - kind: SendActivity
+          id: sendNoDocumentPrompt
+          activity: "No problem — we can still prepare your registration. Let's start with your details."
+
+    # No hard redirect here: Generative AI orchestration (plan §1) routes to
+    # "Document Intake & Interpretation" or "Registration Pre-fill" next, based
+    # on Global.VisitType / Global.HasDocument and the user's following message.

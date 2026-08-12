@@ -1,0 +1,55 @@
+# Handoff Summary — plan §3.8 (always ends here)
+# New topic. Paste this whole file into the topic's code editor.
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    triggerQueries:
+      - I'm ready to check in
+      - what happens next
+      - summary please
+  actions:
+    # --- Call the "Create Handoff Record" action (plan §5) ---
+    # Replace the placeholder URL, or (recommended) swap this node for the
+    # published flow added as a Tool action — see CopilotStudio/README.md.
+    - kind: HttpRequestAction
+      id: callCreateHandoffRecord
+      method: POST
+      url: "https://REPLACE-ME.azurewebsites.net/api/create-handoff-record"
+      headers:
+        Content-Type: application/json
+      body:
+        kind: JsonRequestContent
+        content:
+          visitType: =Global.VisitType
+          fullName: =Global.FullName
+          idType: =Global.IDType
+          idNumber: =Global.IDNumber
+          matchedPackageCode: =Global.MatchedPackageCode
+          matchedPackageName: =Global.MatchedPackageName
+          payableAmount: =Global.PayableAmount
+          billingCurrency: =Global.BillingCurrency
+      response: Topic.HandoffResult
+      responseSchema:
+        kind: Record
+        properties:
+          ticketNumber: String
+
+    - kind: SendActivity
+      id: sendHandoffSummary
+      activity: |-
+        Here's your pre-registration summary — please show this to the front-desk staff:
+
+        - Visit type: {Global.VisitType}
+        - Name (as claimed): {Global.FullName}
+        - ID type: {Global.IDType}
+        - Matched package/coverage: {Global.MatchedPackageName} ({Global.MatchedPackageCode})
+        - Estimated cost: {Global.BillingCurrency} {Global.PayableAmount}
+        - Queue reference: {Topic.HandoffResult.ticketNumber}
+
+        Awaiting in-person identity verification and e-card/insurance card check by staff.
+
+    - kind: EndDialog
+      id: endHandoffSummary
+      clearTopicQueue: true

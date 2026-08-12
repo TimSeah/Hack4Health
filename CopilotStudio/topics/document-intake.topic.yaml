@@ -1,0 +1,101 @@
+# Document Intake & Interpretation — plan §3.3
+# New topic. Paste this whole file into the topic's code editor.
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    triggerQueries:
+      - I have a referral letter
+      - here's my voucher
+      - I have an authorisation form
+      - let me upload my document
+      - I have an HR email about my screening
+      - I have a medical chit
+      - I want to upload a file
+  actions:
+    - kind: Question
+      id: askDocumentContent
+      alwaysPrompt: true
+      variable: Topic.DocumentContent
+      prompt: "Please upload the file, or paste the text of the referral / voucher / authorisation form / HR email here."
+      entity: StringPrebuiltEntity
+
+    # --- Call the "Document Parsing" action (plan §5) ---
+    # Replace the placeholder URL below with the flow's HTTP-trigger URL, or
+    # (recommended) delete this node and add the published flow as a Tool
+    # action instead — see CopilotStudio/README.md.
+    - kind: HttpRequestAction
+      id: callDocumentParsing
+      method: POST
+      url: "https://REPLACE-ME.azurewebsites.net/api/document-parsing"
+      headers:
+        Content-Type: application/json
+      body:
+        kind: JsonRequestContent
+        content:
+          documentText: =Topic.DocumentContent
+      response: Topic.ParsedDocument
+      responseSchema:
+        kind: Record
+        properties:
+          companyOrTpaCode: String
+          policyOrProposalNumber: String
+          patientNameOnDocument: String
+          patientIdOnDocument: String
+          requestedPackageCode: String
+          expiryOrAppointmentDate: String
+          confidenceScore: Number
+
+    - kind: SetMultipleVariables
+      id: storeParsedFields
+      variables:
+        Global.CompanyOrTPACode: =Topic.ParsedDocument.companyOrTpaCode
+        Global.PackageCode: =Topic.ParsedDocument.requestedPackageCode
+
+    - kind: ConditionGroup
+      id: checkParsingConfidence
+      conditions:
+        - id: highConfidenceBranch
+          condition: =Topic.ParsedDocument.confidenceScore >= 0.8
+          actions:
+            - kind: SendActivity
+              id: sendParsedSummary
+              activity: |-
+                Here's what I found in your document (pending staff verification):
+                - Company / insurer / TPA code: {Topic.ParsedDocument.companyOrTpaCode}
+                - Policy / proposal number: {Topic.ParsedDocument.policyOrProposalNumber}
+                - Name on document: {Topic.ParsedDocument.patientNameOnDocument}
+                - Requested package: {Topic.ParsedDocument.requestedPackageCode}
+                - Expiry / appointment date: {Topic.ParsedDocument.expiryOrAppointmentDate}
+
+            - kind: Question
+              id: confirmParsedFields
+              alwaysPrompt: true
+              variable: Topic.ParsedFieldsConfirmed
+              prompt: "Does this look correct?"
+              entity: BooleanPrebuiltEntity
+
+            - kind: ConditionGroup
+              id: checkConfirmation
+              conditions:
+                - id: confirmedBranch
+                  condition: =Topic.ParsedFieldsConfirmed = false
+                  actions:
+                    - kind: SendActivity
+                      id: sendCorrectionNotice
+                      activity: "Thanks for flagging that — a staff member will confirm the correct details with you at the counter."
+                    # Low-confidence / disputed extraction: hand off rather than guess.
+                    - kind: BeginDialog
+                      id: redirectToEscalationOnDispute
+                      dialog: 5d869520-458f-4616-94fb-1e6ad5ab1f97
+      elseActions:
+        - kind: SendActivity
+          id: sendLowConfidenceNotice
+          activity: "I couldn't confidently read all the details on this document, so I'll flag it for a staff member to check instead of guessing."
+        - kind: BeginDialog
+          id: redirectToEscalationOnLowConfidence
+          dialog: 5d869520-458f-4616-94fb-1e6ad5ab1f97
+
+    # On success, continues to "Registration Pre-fill" (plan §3.3 → §3.4),
+    # either via generative orchestration or an explicit BeginDialog redirect.

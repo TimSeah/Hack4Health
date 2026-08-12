@@ -1,0 +1,138 @@
+# Registration Pre-fill — plan §3.4
+# New topic. Paste this whole file into the topic's code editor.
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    triggerQueries:
+      - I'd like to register
+      - walk-in registration
+      - I'm a self-pay patient
+      - register me for my visit
+      - I need to update my details
+  actions:
+    - kind: Question
+      id: askIdType
+      alwaysPrompt: false
+      variable: Global.IDType
+      prompt: "How would you like to identify yourself — NRIC/FIN or Passport?"
+      entity: StringPrebuiltEntity
+
+    - kind: Question
+      id: askIdNumber
+      alwaysPrompt: false
+      variable: Global.IDNumber
+      prompt: "What's your NRIC/FIN or passport number?"
+      entity: StringPrebuiltEntity
+
+    # --- Call the "Patient Lookup" action (plan §5) against existing records ---
+    # Replace the placeholder URL, or (recommended) swap this node for the
+    # published flow added as a Tool action — see CopilotStudio/README.md.
+    - kind: HttpRequestAction
+      id: callPatientLookup
+      method: POST
+      url: "https://REPLACE-ME.azurewebsites.net/api/patient-lookup"
+      headers:
+        Content-Type: application/json
+      body:
+        kind: JsonRequestContent
+        content:
+          idType: =Global.IDType
+          idNumber: =Global.IDNumber
+      response: Topic.PatientRecord
+      responseSchema:
+        kind: Record
+        properties:
+          found: Boolean
+          fullName: String
+          dateOfBirth: String
+          address: String
+          postalCode: String
+          contactMobile: String
+          email: String
+          drugAllergy: String
+
+    - kind: ConditionGroup
+      id: checkPatientFound
+      conditions:
+        - id: patientFoundBranch
+          condition: =Topic.PatientRecord.found = true
+          actions:
+            - kind: SetMultipleVariables
+              id: prefillFromRecord
+              variables:
+                Global.FullName: =Topic.PatientRecord.fullName
+                Global.DateOfBirth: =Topic.PatientRecord.dateOfBirth
+                Global.Address: =Topic.PatientRecord.address
+                Global.PostalCode: =Topic.PatientRecord.postalCode
+                Global.ContactMobile: =Topic.PatientRecord.contactMobile
+                Global.Email: =Topic.PatientRecord.email
+                Global.DrugAllergy: =Topic.PatientRecord.drugAllergy
+
+            - kind: SendActivity
+              id: sendFoundNotice
+              activity: "Welcome back — I found your existing record. I'll only ask about anything that's missing or has changed."
+      elseActions:
+        - kind: SendActivity
+          id: sendNotFoundNotice
+          activity: "I couldn't find an existing record for you, so let's capture your details fresh."
+
+    # The Question nodes below use alwaysPrompt: false, so Copilot Studio skips
+    # any question whose variable already has a value (i.e., was pre-filled
+    # above) and only asks for what's missing or changed.
+    - kind: Question
+      id: askFullName
+      alwaysPrompt: false
+      variable: Global.FullName
+      prompt: "What's your full name, as it appears on your NRIC/FIN or passport?"
+      entity: PersonNamePrebuiltEntity
+
+    - kind: Question
+      id: askDateOfBirth
+      alwaysPrompt: false
+      variable: Global.DateOfBirth
+      prompt: "What's your date of birth?"
+      entity: DateTimePrebuiltEntity
+
+    - kind: Question
+      id: askAddress
+      alwaysPrompt: false
+      variable: Global.Address
+      prompt: "What's your address (block/unit + street)?"
+      entity: StringPrebuiltEntity
+
+    - kind: Question
+      id: askPostalCode
+      alwaysPrompt: false
+      variable: Global.PostalCode
+      prompt: "What's your postal code?"
+      entity: StringPrebuiltEntity
+
+    - kind: Question
+      id: askContactMobile
+      alwaysPrompt: false
+      variable: Global.ContactMobile
+      prompt: "What's the best mobile number to reach you on?"
+      entity: PhoneNumberPrebuiltEntity
+
+    - kind: Question
+      id: askEmail
+      alwaysPrompt: false
+      variable: Global.Email
+      prompt: "What's your email address?"
+      entity: EmailPrebuiltEntity
+
+    - kind: Question
+      id: askDrugAllergy
+      alwaysPrompt: false
+      variable: Global.DrugAllergy
+      prompt: "Do you have any drug allergies? If so, please list them — otherwise, say 'none'."
+      entity: StringPrebuiltEntity
+
+    - kind: SendActivity
+      id: sendRegistrationSummary
+      activity: "Thanks — your registration details are ready for staff to verify at the counter."
+
+    # Continues to "Eligibility & Package Matching" (plan §3.4 → §3.5), either
+    # via generative orchestration or an explicit BeginDialog redirect.

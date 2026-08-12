@@ -1,0 +1,33 @@
+# Visit Type Router — plan §3.2
+# New topic. Paste this whole file into the topic's code editor.
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    triggerQueries:
+      - GP consultation
+      - I'd like to see a doctor
+      - health screening
+      - I want a health checkup
+      - checkup
+      - pre-employment medical
+      - occupational health screening
+      - I need a medical for work
+      - corporate screening
+      - annual health screening
+  actions:
+    - kind: Question
+      id: askVisitType
+      alwaysPrompt: false
+      variable: Global.VisitType
+      prompt: "Just to confirm — is this for a GP consultation, a general health screening, or an occupational health screening?"
+      entity: StringPrebuiltEntity
+
+    - kind: SendActivity
+      id: confirmVisitType
+      activity: =Concat("Got it — ", Global.VisitType, ". Let's get you prepared.")
+
+    # Branches to "Document Intake & Interpretation" (if Global.HasDocument = true)
+    # or "Registration Pre-fill" (if not) — handled by generative orchestration,
+    # or wire an explicit BeginDialog redirect here once those topics exist.

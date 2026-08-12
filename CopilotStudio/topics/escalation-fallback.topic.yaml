@@ -1,0 +1,32 @@
+# Escalation / Fallback — plan §3.9
+# New topic. Paste this whole file into the topic's code editor. Reached
+# either by trigger phrases below, or by a BeginDialog redirect from another
+# topic (low-confidence document parsing, no eligibility match, PDPA decline).
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    triggerQueries:
+      - I want to speak to a person
+      - talk to a human
+      - this doesn't look right
+      - I have a complaint
+      - can you give me medical advice
+      - what does this result mean
+  actions:
+    - kind: SendActivity
+      id: sendEscalationNotice
+      activity: "I want to make sure this is handled correctly, so I'll bring in one of our staff members to help you directly. I can't provide medical advice or confirm identity/eligibility myself — that's always done in person by the clinic team."
+
+    # Retain conversation context for staff: everything captured so far
+    # (Global.* variables) remains available to whatever handoff/live-agent
+    # mechanism you configure (e.g., Omnichannel, Teams handoff, or a
+    # "Create Handoff Record" call reused from the Handoff Summary topic).
+
+    - kind: EndConversation
+      id: endEscalationConversation
+
+    - kind: EndDialog
+      id: endEscalationDialog
+      clearTopicQueue: true
