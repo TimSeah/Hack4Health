@@ -11,32 +11,12 @@ beginDialog:
       - what package am I on
       - is this covered by my insurance
   actions:
-    # --- Call the "Eligibility Lookup" action (plan §5) ---
-    # Replace the placeholder URL, or (recommended) swap this node for the
-    # published flow added as a Tool action — see CopilotStudio/README.md.
-    - kind: HttpRequestAction
-      id: callEligibilityLookup
-      method: POST
-      url: "https://REPLACE-ME.azurewebsites.net/api/eligibility-lookup"
-      headers:
-        Content-Type: application/json
-      body:
-        kind: JsonRequestContent
-        content:
-          companyOrTpaCode: =Global.CompanyOrTPACode
-          packageCodeRequested: =Global.PackageCode
-          visitType: =Global.VisitType
-          dateOfBirth: =Global.DateOfBirth
-          gender: =Global.Gender
-      response: Topic.EligibilityResult
-      responseSchema:
-        kind: Record
-        properties:
-          matchFound: Boolean
-          matchedPackageCode: String
-          matchedPackageName: String
-          coverageRuleSummary: String
-          confidenceScore: Number
+    # Mock-mode replacement for Eligibility Lookup. A prior document code is
+    # required for a match; direct calls without one follow the escalation path.
+    - kind: SetVariable
+      id: setVariable_eJbRiO
+      variable: Topic.EligibilityResult
+      value: "={matchFound: Not(IsBlank(Global.CompanyOrTPACode)), matchedPackageCode: If(IsBlank(Global.PackageCode), \"WELL2\", Global.PackageCode), matchedPackageName: \"Comprehensive Screen\", coverageRuleSummary: \"Fully covered by Everwell, pending staff verification.\", confidenceScore: 0.95}"
 
     - kind: ConditionGroup
       id: checkEligibilityMatch

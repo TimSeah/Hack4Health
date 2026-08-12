@@ -89,6 +89,7 @@ Max **4 pages** (excluding appendix). Required sections, per [3. Hack4Health Jud
 | [Data/occupational_health_questionnaire_mock_patients.csv](Data/occupational_health_questionnaire_mock_patients.csv) | Mock completed Occupational Health screening questionnaires |
 | [Data/Parkway_Shenton_Questionnaires_Field_Reference.md](Data/Parkway_Shenton_Questionnaires_Field_Reference.md) | Full field-by-field schema for both questionnaires |
 | [Data/Sample Medical Chit Letters (v2).md](Data/Sample%20Medical%20Chit%20Letters%20(v2).md) | Sample synthetic insurer/TPA referral letters, vouchers, and authorisation forms to parse |
+| [TEST_CASE.md](TEST_CASE.md) | Copilot Studio Evaluation cases, mock contracts, and semantic pass criteria |
 | [1. Technical Problem Statement.md](1.%20Technical%20Problem%20Statement.md) | Full challenge brief, as-is process flow, and admin-impact figures |
 | [2. Non-Technical Problem Statement.md](2.%20Non-Technical%20Problem%20Statement.md) | The other track's brief (vaccination uptake), for reference |
 | [3. Hack4Health Judging Criteria.md](3.%20Hack4Health%20Judging%20Criteria.md) | Submission templates and judging sheets for both tracks |

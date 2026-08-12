@@ -26,32 +26,12 @@ beginDialog:
       prompt: "What's your NRIC/FIN or passport number?"
       entity: StringPrebuiltEntity
 
-    # --- Call the "Patient Lookup" action (plan §5) against existing records ---
-    # Replace the placeholder URL, or (recommended) swap this node for the
-    # published flow added as a Tool action — see CopilotStudio/README.md.
-    - kind: HttpRequestAction
-      id: callPatientLookup
-      method: POST
-      url: "https://REPLACE-ME.azurewebsites.net/api/patient-lookup"
-      headers:
-        Content-Type: application/json
-      body:
-        kind: JsonRequestContent
-        content:
-          idType: =Global.IDType
-          idNumber: =Global.IDNumber
-      response: Topic.PatientRecord
-      responseSchema:
-        kind: Record
-        properties:
-          found: Boolean
-          fullName: String
-          dateOfBirth: String
-          address: String
-          postalCode: String
-          contactMobile: String
-          email: String
-          drugAllergy: String
+    # Mock-mode replacement for Patient Lookup. The synthetic patient is found
+    # only for S4744854C, allowing found/not-found evaluation paths.
+    - kind: SetVariable
+      id: setVariable_lXSbtc
+      variable: Topic.PatientRecord
+      value: "={found: Global.IDNumber = \"S4744854C\", fullName: \"Tan Kai Xuan\", dateOfBirth: \"1993-12-18\", address: \"Blk 433 Ang Mo Kio Ave 3 #03-704\", postalCode: \"131244\", contactMobile: \"89478454\", email: \"kai.tan78@gmail.com\", drugAllergy: \"None\"}"
 
     - kind: ConditionGroup
       id: checkPatientFound
@@ -63,7 +43,7 @@ beginDialog:
               id: prefillFromRecord
               variables:
                 Global.FullName: =Topic.PatientRecord.fullName
-                Global.DateOfBirth: =Topic.PatientRecord.dateOfBirth
+                Global.DateOfBirth: =DateValue(Topic.PatientRecord.dateOfBirth)
                 Global.Address: =Topic.PatientRecord.address
                 Global.PostalCode: =Topic.PatientRecord.postalCode
                 Global.ContactMobile: =Topic.PatientRecord.contactMobile
@@ -93,7 +73,7 @@ beginDialog:
       alwaysPrompt: false
       variable: Global.DateOfBirth
       prompt: "What's your date of birth?"
-      entity: DateTimePrebuiltEntity
+      entity: DatePrebuiltEntity
 
     - kind: Question
       id: askAddress

@@ -38,42 +38,153 @@ not the code editor. Full reliable click-by-click workflow is below.
 | Handoff Summary | `798f70c7-e80f-4b6a-a872-79610b04ca83` |
 | Escalation / Fallback | `5d869520-458f-4616-94fb-1e6ad5ab1f97` |
 
-## Status (as of this checkpoint)
+## Status (repaired and reverified, 12 August 2026)
+
+All nine required topics now show **0 errors** in Topic checker and no error count in the refreshed
+Topics overview. All nine are enabled. Verification used a fully loaded page, repeated traversal
+of each virtualized canvas until its height stabilized, and matching refreshed checker counts.
 
 | Topic | Status |
 | --- | --- |
-| Billing Estimate | ✅ **Fixed & verified** — Set variables (PayableAmount, BillingCurrency) rebuilt via UI, redirect rebuilt via UI → **Handoff Summary**. Saved clean, 0 errors. |
-| Registration Pre-fill | ✅ **Fixed & verified** — 7-field Set variables node rebuilt via UI (FullName, DateOfBirth, Address, PostalCode, ContactMobile, Email, DrugAllergy). Also had to change the `DateOfBirth` Question's "Identify" entity from **Date and time** to **User's entire response** (see Gotcha #3 below) to fix a type-mismatch error. Saved clean, 0 errors. |
-| Document Intake & Interpretation | 🔴 **In progress, NOT verified clean.** See "Next immediate steps" below — last screenshot shows the `storeParsedFields` Set variables node is genuinely **empty** (no CompanyOrTPACode/PackageCode assignments present despite earlier work in this direction — re-do from scratch, don't assume prior partial progress survived). The low-confidence-branch redirect (elseActions of `checkParsingConfidence`) is still showing broken ("ClinicPrep Assistant" / topic picker never completed). The dispute-branch redirect (inside `checkConfirmation`, on "No" to "Does this look correct?") status is **unconfirmed** — it may or may not still be there; scroll to it and check before assuming either way. |
-| Eligibility & Package Matching | ⬜ Not yet started this pass. Known to need: Set variables fix (MatchedPackageCode, MatchedPackageName, CoverageRuleSummary) + 1 redirect fix (no-match branch → Escalation / Fallback). |
-| Handoff Summary | ⬜ Not yet started this pass. Likely needs Set variables review (this topic mostly reads Global.* rather than setting them, but re-check with Topic checker). |
-| Consent Questionnaire Pre-fill | ⬜ Not yet started this pass. Known to need: 2 redirect fixes (PDPA-decline branch → Escalation / Fallback; acknowledgement → Billing Estimate). |
-| Visit Type Router | ⬜ Not checked in this pass (previously saved with 0 errors when first created — verify it's still clean). |
-| Greeting | ⬜ Not checked in this pass (previously saved with 0 errors when first created — verify it's still clean). |
-| Escalation / Fallback | ⬜ Not checked in this pass (previously saved with 0 errors when first created — verify it's still clean). |
+| Greeting | **Verified clean.** Both branches now redirect to **Visit Type Router**. |
+| Visit Type Router | **Verified clean and enabled.** The question writes `Global.VisitType`, the confirmation renders as normal text, and the topic redirects to **Document Intake & Interpretation**. |
+| Document Intake & Interpretation | **Verified clean.** Rebuilt `Global.CompanyOrTPACode` and `Global.PackageCode`; dispute and low-confidence branches both redirect to **Escalation / Fallback**. |
+| Registration Pre-fill | **Verified clean.** All seven assignments remain present. The lookup value uses `DateValue(Topic.PatientRecord.dateOfBirth)` and the question uses the Date entity, matching `Global.DateOfBirth`. |
+| Eligibility & Package Matching | **Verified clean.** Rebuilt `Global.MatchedPackageCode`, `Global.MatchedPackageName`, and `Global.CoverageRuleSummary`; no-match redirects to **Escalation / Fallback**. |
+| Consent Questionnaire Pre-fill | **Verified clean.** `Global.VisitType` conditions resolve; PDPA decline redirects to **Escalation / Fallback** and acknowledgement redirects to **Billing Estimate**. |
+| Billing Estimate | **Verified clean.** `Global.PayableAmount` and `Global.BillingCurrency` assignments are present; redirect resolves to **Handoff Summary**. |
+| Handoff Summary | **Verified clean.** All upstream global references resolve and the in-person verification notice remains present. |
+| Escalation / Fallback | **Verified clean.** Staff-handoff message and End current topic are present. |
 
-## Next immediate steps (resume here)
+## Runtime test result
 
-1. Open Document Intake & Interpretation (GUID above). Open **Topic checker** to see the
-   current live error count/list (don't trust old assumptions).
-2. Fix the `storeParsedFields` Set variables node: add 2 assignments —
-   `Global.CompanyOrTPACode = Topic.ParsedDocument.companyOrTpaCode`,
-   `Global.PackageCode = Topic.ParsedDocument.requestedPackageCode` — using the UI workflow
-   below.
-3. Scroll down to find both redirect nodes (dispute branch + low-confidence branch). Fix
-   whichever are still broken so both point to **Escalation / Fallback**, using the redirect
-   workflow below.
-4. Save. Confirm 0 errors (no "Save topic with errors?" dialog).
-5. Repeat the same diagnose → fix Set variables → fix redirects → save → verify pattern for:
-   **Eligibility & Package Matching**, **Consent Questionnaire Pre-fill**, **Handoff Summary**.
-6. Re-check **Visit Type Router**, **Greeting**, **Escalation / Fallback** with Topic checker
-   just in case (they were clean before, shouldn't have regressed, but verify).
-7. Once all 9 show 0 errors, do a full end-to-end Test panel run (Greeting → Visit Type →
-   Document/Registration → Eligibility → Consent → Billing → Handoff) and take screenshots at
-   each step to visually confirm, per the user's instruction to keep using the screenshot tool
-   to verify.
-8. Update [CopilotStudio/README.md](CopilotStudio/README.md) status section once everything is
-   confirmed clean (it currently overstates completeness from the previous pass).
+The five unavailable external actions have been replaced with typed, deterministic mock records.
+No `REPLACE-ME` or `HttpRequestAction` remains in the nine local topic references. Live tests
+verify both:
+
+- EVWPA document extraction -> confirmation with no URI error.
+- `illegible` / `ambiguous` document -> low-confidence refusal and staff escalation.
+- Returning patient `S4744854C` -> synthetic pre-fill with no lookup error.
+
+The refreshed Topics overview remains at 0 errors and all nine required topics are enabled.
+See [TEST_CASE.md](TEST_CASE.md) for Evaluation-ready conversations and single responses.
+
+To prevent orchestration conflicts during Evaluation, these overlapping legacy custom topics
+were disabled: **Data Retrieval from CMS**, **First-time Visit Registration**,
+**Info Confirmation**, **Purpose of Visit**, and **Registration**. The nine project topics remain
+enabled.
+
+Evaluation sets created and started:
+
+- `ClinicPrep Mock - Safety Boundaries`: 8 Single response cases, General quality.
+- `ClinicPrep Mock - Core Conversations`: 8 Conversation cases, General quality.
+
+Evaluation results: Safety Boundaries scored 63% (5 pass, 3 fail). Core Conversations initially
+scored 50% (4 pass, 4 fail); corrected rerun `260812_1543` scored 63% (5 pass, 3 fail).
+General quality still penalized three required safety escalations as refusal. The one genuine
+conversation failure was fixed by removing the Registration Pre-fill redirect to the disabled
+legacy first-time topic. The corrected run passed both registration paths, and no
+`RedirectToDisabledTopic` failure remains.
+
+## 24-hour submission sprint (deadline: 13 August 2026)
+
+The full audit is in [AUDIT.md](AUDIT.md). The realistic target is a polished, defensible
+**hackathon prototype submission**, not production readiness. Preserve the currently working demo
+and avoid broad topic rewrites unless a change directly improves judging evidence.
+
+### Latest progress
+
+- [x] First four-page draft created: [TECHNICAL_TRACK_SUBMISSION.md](TECHNICAL_TRACK_SUBMISSION.md).
+- [x] Six live Copilot Studio appendix figures captured as contextual UI panels under
+   [SubmissionAssets/](SubmissionAssets/): topic health, both complete Evaluation runs, safe
+   document escalation, returning-patient registration, and handoff summary.
+- [ ] Remaining draft placeholders: team details, approved cost assumptions, final GitHub URL, and
+   demo-video URL.
+- [ ] PDF layout/export and final four-page verification remain outstanding.
+
+### Definition of submission-ready
+
+- [ ] Maximum-four-page Technical Track submission exported to PDF, excluding appendix.
+- [ ] Team information and contact details supplied by the team.
+- [ ] Claims clearly distinguish live behavior, deterministic mock behavior, and production roadmap.
+- [x] At least five legible appendix screenshots cover the demonstrated journey and Evaluation results.
+- [ ] A repeatable two-to-three-minute demo script and short recorded walkthrough exist.
+- [ ] The agent is published to one judge-accessible test channel, if tenant policy permits.
+- [ ] Safety settings are hardened and the two genuine safety-response gaps are retested.
+- [ ] No topic errors, connector errors, broken redirects, or exposed internal placeholder text remain.
+
+### P0 - highest judging return (next 4-6 hours)
+
+1. **Create the submission draft.** Build a concise four-page document from `README.md`,
+   `PLAN.md`, `FLOW.md`, `AUDIT.md`, and `TEST_CASE.md` with placeholders only for team-supplied
+   facts. Include the required 200-word executive summary, problem, solution, architecture,
+   quantified impact, feasibility, governance, and scalability sections.
+2. **Quantify defensible impact and cost assumptions.** Convert the 23-32 minute baseline into a
+   conservative target range, staff-hours saved for 40 patients, and a clearly labelled pilot
+   measurement plan. Do not present mock Evaluation scores as operational savings.
+3. **Harden live generative settings.** Prefer a stable model over GPT-5 Auto (Preview); raise
+   moderation if the tenant allows it; disable ungrounded responses and public web search for the
+   judged healthcare workflow. Re-test happy and escalation paths after each change.
+4. **Fix the two genuine safety-response gaps.** Medication responses must explicitly direct the
+   user to a clinician/clinic staff before changing medication. Chest-pain responses must include
+   appropriate urgent or emergency-care guidance without diagnosing.
+5. **Clean presentation risks.** Rewrite the informal NRIC/FIN/passport entity description,
+   remove or justify the duplicate General Health knowledge file, and verify no disabled legacy
+   topic appears in the demo journey.
+
+### P1 - strengthen the live demonstration (following 6-8 hours)
+
+1. **Attempt one real Copilot Studio tool integration.** The best scoped candidate is `Create
+   Handoff Record`: use an agent flow to accept the summary, return a ticket, and write a minimal
+   timestamped record to Dataverse or SharePoint if permissions allow. Keep the other four
+   integrations explicitly mocked. Add one focused Tool use evaluation if the flow succeeds.
+2. **Improve the staff handoff summary.** Add document/eligibility confidence, allergy, missing
+   item, staff-review reason, and pending-verification fields without exposing unnecessary PII.
+3. **Expand only the most demonstrable questionnaire gaps.** Prioritise current medications,
+   drug allergies, present complaints, occupational screening type, family history, alcohol, and
+   exercise. Do not attempt every field in the full questionnaire schema before the deadline.
+4. **Publish a controlled demo channel.** Prefer Microsoft Teams or another Entra-authenticated
+   test channel. If publishing is blocked, document the tenant limitation and use the Test pane in
+   the recorded demo.
+5. **Run focused regression checks.** Re-run the Safety set and the corrected Core Conversation
+   set; preserve required escalation behavior even if General quality still calls it refusal.
+
+### P2 - evidence and packaging (final 6-8 hours)
+
+1. Capture appendix screenshots for: Greeting/Visit Type, document extraction confirmation,
+   returning and not-found registration, eligibility/billing, questionnaire declaration, handoff
+   reference, topic overview with zero errors, and Evaluation results.
+2. Prepare a two-to-three-minute demo script with one happy path and one safe-escalation path.
+3. Record the walkthrough, check that no personal notifications or unrelated tenant data appear,
+   and add the video/GitHub references to the appendix.
+4. Export the final submission to PDF, confirm the four-page main-body limit, proofread every
+   numeric claim, and verify all links and images.
+
+### Work Copilot can cover autonomously
+
+- Draft and tighten the four-page submission and appendix text.
+- Produce conservative impact calculations, architecture wording, implementation timeline, risk
+  register, governance section, scalability roadmap, demo script, and judge Q&A.
+- Apply scoped Copilot Studio safety/topic fixes, run focused Evaluations, and capture screenshots.
+- Attempt the handoff agent flow and controlled publication using the existing tenant permissions.
+- Keep `AUDIT.md`, `WORK.md`, and `TEST_CASE.md` aligned with verified outcomes.
+
+### Team input required as early as possible
+
+- Team name, institution, member names, and contact person.
+- Final GitHub URL/visibility and any required branding or logos.
+- Approval of operational/cost assumptions and any claims about clinic systems or pilot access.
+- Choice of final demo channel and help with tenant-admin approvals if publishing or model settings
+  are restricted.
+- Human narration/recording and final submission upload.
+
+### Explicitly out of scope before the deadline
+
+- Production Clinic Assist, NEHR, insurer/TPA, or real patient-data integration.
+- All five production-grade Power Automate flows and full Dataverse security design.
+- Every field in both screening questionnaires.
+- Multilingual implementation, load testing, formal penetration testing, or PDPA certification.
+- Removing safe refusal/escalation behavior merely to improve General quality scores.
 
 ## Reliable UI workflow — fixing a "Set variables" node
 
@@ -113,20 +224,26 @@ not the code editor. Full reliable click-by-click workflow is below.
 
 1. **`SetMultipleVariables` YAML → empty canvas node.** See above; always rebuild via UI.
 2. **`BeginDialog` YAML → broken redirect.** See above; always rebuild via UI.
-3. **DateTime/PhoneNumber prebuilt entity type mismatch.** A Question node using
-   `DateTimePrebuiltEntity` (or similar typed prebuilt entities) resolves to a non-string type
-   (e.g. `DateTime`) at the node level. If a `Global` variable of the same name is later also
-   assigned a `String` value elsewhere (e.g. from an `HttpRequestAction` response schema
-   declared as `String`), Copilot Studio raises **"Variable is being set to an incorrect type.
-   Assigned: DateTime, expected: String."** Fix: change the Question node's **"Identify"**
-   entity to **"User's entire response"** (plain string, no extraction) to keep the field
-   consistently typed as String end-to-end. Watch for this on any other
-   `DateTimePrebuiltEntity`/`PhoneNumberPrebuiltEntity` fields that feed into a later
-   `SetVariable`/`SetMultipleVariables` assignment.
+3. **Keep all producers of a shared variable on one type.** `Global.DateOfBirth` was already a
+   Date, while the lookup schema and a **User's entire response** question produced String. The
+   verified fix was to use `DateValue(Topic.PatientRecord.dateOfBirth)` for the lookup assignment
+   and the Date entity for the question. Apply the same end-to-end type check to other shared
+   DateTime/PhoneNumber fields.
 4. Clipboard paste into the Monaco code editor can silently fail (editor shows empty /
    "Content is empty.") — always verify pasted content before saving, and don't assume a paste
    succeeded on the first try. (Less relevant now that we're avoiding YAML edits for the two
    broken node kinds, but still applies if any further code-editor use is needed.)
+5. **Topic checker can initially show a stale 0-error result before the page and off-screen nodes
+   finish loading.** Wait for `document.readyState === "complete"`, no visible loading indicator,
+   and a stable `.flow-editor-container.scrollHeight`. Traverse the full canvas repeatedly until
+   its height remains stable after traversal, then close/reopen Topic checker twice and require
+   matching counts. During the 12 August audit, Registration initially appeared clean before its
+   lower nodes mounted, and Eligibility initially appeared clean before its delayed canvas load;
+   their final stable counts were 2 errors each.
+6. **The Topics overview and Topic checker can use different aggregation levels.** Consent showed
+   8 persisted errors in the refreshed overview but `Errors (4)` in its fully stabilized editor.
+   Record both figures; use the overview as the aggregate count and Topic checker as the grouped
+   repair list. A topic is verified clean only when both views report 0 after save and refresh.
 
 ## Pre-existing topics in this agent (leave alone)
 
@@ -138,5 +255,4 @@ generic Copilot-generated scaffold topics, not part of this plan.
 - Plan: [PLAN.md](PLAN.md)
 - Topic YAML source (now known to be unreliable for `SetMultipleVariables`/`BeginDialog` —
   treat as reference/history only, not as something to re-paste): [CopilotStudio/topics/](CopilotStudio/topics/)
-- Prior status write-up (overstates completeness — superseded by this file):
-  [CopilotStudio/README.md](CopilotStudio/README.md)
+- Deployment notes and remaining action wiring: [CopilotStudio/README.md](CopilotStudio/README.md)

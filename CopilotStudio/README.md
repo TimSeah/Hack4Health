@@ -1,12 +1,14 @@
 # Copilot Studio — Topic YAML Source
 
-YAML source for the 9 topics described in [PLAN.md](../PLAN.md) (Section 3). **These have
-already been deployed** into the live "ClinicPrep Assistant" agent in Copilot Studio and
-verified working (see Status below) — this folder is the source-controlled copy.
+YAML reference source for the 9 topics described in [PLAN.md](../PLAN.md) (Section 3). These
+topics are deployed in the live "ClinicPrep Assistant" agent. `SetMultipleVariables` assignments
+and `BeginDialog` redirects in these files are reference/history only: those nodes had to be
+rebuilt in the low-code canvas because hand-authored YAML did not round-trip reliably.
 
-## Status: deployed and verified (2026-08-11)
+## Status: topic errors cleared (2026-08-12)
 
-All 9 topics were created directly in Copilot Studio via the code editor and saved:
+All 9 required topics are enabled and show **0 errors** in both Topic checker and the refreshed
+Topics overview:
 
 | Topic | Copilot Studio topic ID |
 | --- | --- |
@@ -20,35 +22,41 @@ All 9 topics were created directly in Copilot Studio via the code editor and sav
 | Handoff Summary | `798f70c7-e80f-4b6a-a872-79610b04ca83` |
 | Escalation / Fallback | `5d869520-458f-4616-94fb-1e6ad5ab1f97` |
 
-All `BeginDialog` redirects in these files already reference the **real GUIDs** above (not
-placeholder names) — no manual patching needed.
+The live canvas redirects were recreated through **Topic management -> Go to another topic**;
+do not re-paste the hand-authored `BeginDialog` GUIDs from these files.
 
-**Live-tested in the Test panel:** Greeting fires on "Hi" → asks visit type → asks about a
-document → (no document) → generative orchestration correctly hands off to Registration
-Pre-fill → asks ID type → ID number → calls the Patient Lookup action. That last call fails
-because it hits the placeholder URL (`https://REPLACE-ME...`) — expected, see "Still to do".
+**Live-tested in the Test panel:** `Hi` triggers Greeting, both first-time branches route to
+Visit Type Router, and `Global.VisitType` is captured. Document extraction, low-confidence
+escalation, and returning-patient lookup run without external calls or URI errors.
+
+## Mock action mode
+
+The unavailable external actions are replaced by typed `SetVariable` records:
+
+| Action | Mock behavior |
+| --- | --- |
+| Document Parsing | EVWPA/WELL2 fixture; `illegible` or `ambiguous` input returns confidence 0.4. |
+| Patient Lookup | `S4744854C` returns the synthetic Tan Kai Xuan record; other IDs are not found. |
+| Eligibility Lookup | Existing company code returns WELL2 Comprehensive Screen; missing context escalates. |
+| Billing Calculation | WELL2 returns SGD 0 payable; other codes return SGD 75. |
+| Create Handoff Record | Returns `MOCK-H4H-001`. |
+
+Evaluation cases and pass criteria are in [TEST_CASE.md](../TEST_CASE.md). Use **General
+quality**, not **Tool use**, while mock mode is active.
+
+For isolated Evaluation runs, the overlapping legacy topics **Data Retrieval from CMS**,
+**First-time Visit Registration**, **Info Confirmation**, **Purpose of Visit**, and
+**Registration** are disabled. Copilot Studio imports at most 6 question-answer pairs per
+conversation; split longer scenarios into focused cases.
 
 ## Still to do
 
-### 1. Replace the 5 placeholder action URLs
-
-Each of these topics calls one backend action via an `HttpRequestAction` node pointed at
-`https://REPLACE-ME.azurewebsites.net/...` (confirmed to fail with `InvalidUriContent` until
-replaced):
-
-| Action (plan §5) | Topic |
-| --- | --- |
-| Document Parsing | Document Intake & Interpretation |
-| Patient Lookup | Registration Pre-fill |
-| Eligibility Lookup | Eligibility & Package Matching |
-| Billing Calculation | Billing Estimate |
-| Create Handoff Record | Handoff Summary |
+### 1. Replace mock records before production
 
 Build each flow in Power Automate (see
 [Create an agent flow as a tool](https://learn.microsoft.com/microsoft-copilot-studio/advanced-flow-create)),
-then either replace the placeholder URL with the flow's HTTP-trigger URL, or (recommended)
-delete the `HttpRequestAction` node in the canvas and use **Add an action → Flow** instead,
-which Studio wires up with the correct connection reference.
+then replace each mock `SetVariable` node with **Add an action -> Flow**. Add Tool use
+evaluations for action selection, input mapping, failure handling, and audit logging.
 
 ### 2. Optional: upgrade closed-list fields from free text
 
@@ -61,19 +69,6 @@ Health Screening), `IDType` (NRIC/FIN / Passport), etc., per plan §4, then chan
 corresponding `Question` node's `entity:` value in the canvas (the exact YAML for a closed-list
 reference wasn't reverse-engineered here — easiest done by picking the entity in the UI and
 reading back the generated YAML).
-
-### 3. Ignore-or-fix: "Identifier not recognized" warnings on some `Global.*` variables
-
-Topics show a handful of non-blocking Topic checker warnings like `Identifier not recognized in
-expression 'Global.MatchedPackageName'`. Root cause (confirmed in Studio): a `Global.X`
-variable only gets registered in the agent's global variable schema when it's first set via a
-**Question** node; setting it only via `SetVariable`/`SetMultipleVariables` (as done here, e.g.
-`MatchedPackageCode`, `MatchedPackageName`, `CoverageRuleSummary`, `PayableAmount`,
-`BillingCurrency`) doesn't register it, even though the assignment itself saves fine. These
-warnings didn't block saving and the variables are still written/read at runtime — but if you
-want a clean Topic checker, open each source topic's **Variables** panel, find the variable,
-and it should get properly registered once you interact with it there (or via **Variable
-properties → convert to global**, the same path used for any topic-scoped variable).
 
 ## Verified facts about the Copilot Studio topic-YAML schema
 
@@ -94,6 +89,10 @@ These were confirmed empirically while deploying (not just from docs) — see
 - `inputType: {}` / `outputType: {}` top-level keys are **not required** for normal topics.
 - Pasting into the code editor via clipboard (`navigator.clipboard.writeText` + paste) preserves
   exact formatting; typing character-by-character risks Monaco auto-indent corrupting YAML.
+- Hand-authored `SetMultipleVariables.variables` maps can disappear after round-trip, leaving an
+  empty Set variables node (`EmptyCollection`). Rebuild these assignments in the canvas.
+- Hand-authored `BeginDialog.dialog` GUIDs can render as unavailable Topic nodes. Rebuild each
+  redirect through the topic picker in the canvas.
 
 ## File → topic map
 

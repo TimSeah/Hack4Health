@@ -10,27 +10,12 @@ beginDialog:
       - is this fully covered
       - what's my out-of-pocket cost
   actions:
-    # --- Call the "Billing Calculation" action (plan §5) ---
-    # Replace the placeholder URL, or (recommended) swap this node for the
-    # published flow added as a Tool action — see CopilotStudio/README.md.
-    - kind: HttpRequestAction
-      id: callBillingCalculation
-      method: POST
-      url: "https://REPLACE-ME.azurewebsites.net/api/billing-calculation"
-      headers:
-        Content-Type: application/json
-      body:
-        kind: JsonRequestContent
-        content:
-          matchedPackageCode: =Global.MatchedPackageCode
-          coverageRuleSummary: =Global.CoverageRuleSummary
-      response: Topic.BillingResult
-      responseSchema:
-        kind: Record
-        properties:
-          coveredAmount: Number
-          payableAmount: Number
-          currency: String
+    # Mock-mode replacement for Billing Calculation. WELL2 is fully covered;
+    # other package codes return a deterministic SGD 75 estimate.
+    - kind: SetVariable
+      id: setVariable_xe5Kvf
+      variable: Topic.BillingResult
+      value: "={coveredAmount: 350, payableAmount: If(Global.MatchedPackageCode = \"WELL2\", 0, 75), currency: \"SGD\"}"
 
     - kind: SetMultipleVariables
       id: storeBillingResult

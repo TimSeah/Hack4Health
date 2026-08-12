@@ -10,31 +10,11 @@ beginDialog:
       - what happens next
       - summary please
   actions:
-    # --- Call the "Create Handoff Record" action (plan §5) ---
-    # Replace the placeholder URL, or (recommended) swap this node for the
-    # published flow added as a Tool action — see CopilotStudio/README.md.
-    - kind: HttpRequestAction
-      id: callCreateHandoffRecord
-      method: POST
-      url: "https://REPLACE-ME.azurewebsites.net/api/create-handoff-record"
-      headers:
-        Content-Type: application/json
-      body:
-        kind: JsonRequestContent
-        content:
-          visitType: =Global.VisitType
-          fullName: =Global.FullName
-          idType: =Global.IDType
-          idNumber: =Global.IDNumber
-          matchedPackageCode: =Global.MatchedPackageCode
-          matchedPackageName: =Global.MatchedPackageName
-          payableAmount: =Global.PayableAmount
-          billingCurrency: =Global.BillingCurrency
-      response: Topic.HandoffResult
-      responseSchema:
-        kind: Record
-        properties:
-          ticketNumber: String
+    # Mock-mode replacement for Create Handoff Record.
+    - kind: SetVariable
+      id: setVariable_U157rp
+      variable: Topic.HandoffResult
+      value: "={ticketNumber: \"MOCK-H4H-001\"}"
 
     - kind: SendActivity
       id: sendHandoffSummary

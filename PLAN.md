@@ -183,3 +183,15 @@ Add as generative-answers knowledge (read-only, for Q&A like "what does WELL2 co
 - Primary channel: clinic-managed **kiosk/tablet** at pre-registration, or a **patient-facing web/Teams link** sent ahead of a scheduled appointment.
 - Secondary: embed in **Microsoft Teams** for internal staff testing during the hackathon demo.
 - Publish to a **test environment** first; require sign-off against the Governance & Safety checklist before any production/pilot deployment.
+
+## 11. Implementation Checkpoint (2026-08-12)
+
+- All nine required Copilot Studio topics are enabled and report 0 errors in Topic checker and
+  the refreshed Topics overview.
+- The live Test panel verifies Greeting -> Visit Type Router -> Document Intake routing and
+  correct capture of `Global.VisitType`.
+- The five unavailable actions use deterministic in-topic mock records, allowing Evaluation to
+  run without external APIs. Replace these records with Power Automate actions before production.
+- Evaluation-ready cases are documented in [TEST_CASE.md](TEST_CASE.md).
+- See [WORK.md](WORK.md) for the repair record and [CopilotStudio/README.md](CopilotStudio/README.md)
+  for deployment details.

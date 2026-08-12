@@ -21,31 +21,12 @@ beginDialog:
       prompt: "Please upload the file, or paste the text of the referral / voucher / authorisation form / HR email here."
       entity: StringPrebuiltEntity
 
-    # --- Call the "Document Parsing" action (plan §5) ---
-    # Replace the placeholder URL below with the flow's HTTP-trigger URL, or
-    # (recommended) delete this node and add the published flow as a Tool
-    # action instead — see CopilotStudio/README.md.
-    - kind: HttpRequestAction
-      id: callDocumentParsing
-      method: POST
-      url: "https://REPLACE-ME.azurewebsites.net/api/document-parsing"
-      headers:
-        Content-Type: application/json
-      body:
-        kind: JsonRequestContent
-        content:
-          documentText: =Topic.DocumentContent
-      response: Topic.ParsedDocument
-      responseSchema:
-        kind: Record
-        properties:
-          companyOrTpaCode: String
-          policyOrProposalNumber: String
-          patientNameOnDocument: String
-          patientIdOnDocument: String
-          requestedPackageCode: String
-          expiryOrAppointmentDate: String
-          confidenceScore: Number
+    # Mock-mode replacement for Document Parsing. Replace this SetVariable
+    # with the published Power Automate action before production use.
+    - kind: SetVariable
+      id: setVariable_Sb1oDr
+      variable: Topic.ParsedDocument
+      value: "={companyOrTpaCode: \"EVWPA\", policyOrProposalNumber: \"EVW563298\", patientNameOnDocument: \"Lim Arjun\", patientIdOnDocument: \"T2221854H\", requestedPackageCode: \"WELL2\", expiryOrAppointmentDate: \"30 Sep 2026\", confidenceScore: If(Or(\"illegible\" in Lower(Topic.DocumentContent), \"ambiguous\" in Lower(Topic.DocumentContent)), 0.4, 0.95)}"
 
     - kind: SetMultipleVariables
       id: storeParsedFields
