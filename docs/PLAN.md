@@ -1,6 +1,6 @@
 # Copilot Studio Agent Setup Plan — Pre-Registration & Eligibility Assistant
 
-Implementation plan for the Technical Track solution (see [README.md](README.md) and [1. Technical Problem Statement.md](1.%20Technical%20Problem%20Statement.md)). This describes how to configure the agent directly in **Microsoft Copilot Studio**.
+Implementation plan for the Technical Track solution (see [README.md](../README.md) and [1. Technical Problem Statement.md](../ProblemStatement/1.%20Technical%20Problem%20Statement.md)). This describes how to configure the agent directly in **Microsoft Copilot Studio**.
 
 ## 1. Agent Identity
 
@@ -98,7 +98,7 @@ Use classic Topics for the compliance-critical / fixed steps, and let generative
 ### 3.6 `Consent Questionnaire Pre-fill`
 - Trigger: package/eligibility confirmed
 - Branches by `VisitType`:
-  - **General Health Screening** → walks through Medical History, Family History, Lifestyle sections from [Data/Parkway_Shenton_Questionnaires_Field_Reference.md](Data/Parkway_Shenton_Questionnaires_Field_Reference.md), pre-filled from prior visits where available
+  - **General Health Screening** → walks through Medical History, Family History, Lifestyle sections from [Data/Parkway_Shenton_Questionnaires_Field_Reference.md](../Data/Parkway_Shenton_Questionnaires_Field_Reference.md), pre-filled from prior visits where available
   - **Occupational Health Screening** → shorter Personal/Family history + lifestyle Yes/No set, plus hazard-specific screening type multi-select
 - Ends with the PDPA declaration statement and asks the patient to acknowledge (equivalent of the signature step) — **this acknowledgement is captured, not the physical signature**
 - Routes to `Billing Estimate`
@@ -148,9 +148,9 @@ Define these as Copilot Studio entities (or Dataverse choice columns) so slots r
 
 Add as generative-answers knowledge (read-only, for Q&A like "what does WELL2 cover?"):
 
-- [Data/Parkway_Shenton_Questionnaires_Field_Reference.md](Data/Parkway_Shenton_Questionnaires_Field_Reference.md)
-- [Data/Sample Medical Chit Letters (v2).md](Data/Sample%20Medical%20Chit%20Letters%20(v2).md) *(as few-shot reference for document formats, not real data)*
-- [1. Technical Problem Statement.md](1.%20Technical%20Problem%20Statement.md) *(for the agent to explain "why" if asked)*
+- [Data/Parkway_Shenton_Questionnaires_Field_Reference.md](../Data/Parkway_Shenton_Questionnaires_Field_Reference.md)
+- [Data/Sample Medical Chit Letters (v2).md](../Data/Sample%20Medical%20Chit%20Letters%20(v2).md) *(as few-shot reference for document formats, not real data)*
+- [1. Technical Problem Statement.md](../ProblemStatement/1.%20Technical%20Problem%20Statement.md) *(for the agent to explain "why" if asked)*
 - A curated **package/coverage rules table** (build from the sample chits: package codes, inclusions, age bands)
 
 ## 7. Variables & Data Model (Dataverse tables to create)
@@ -193,5 +193,5 @@ Add as generative-answers knowledge (read-only, for Q&A like "what does WELL2 co
 - Four unavailable actions use deterministic in-topic mock records, allowing Evaluation to
   run without external APIs. Replace these records with Power Automate actions before production.
 - Evaluation-ready cases are documented in [TEST_CASE.md](TEST_CASE.md).
-- See [WORK.md](WORK.md) for the repair record and [CopilotStudio/README.md](CopilotStudio/README.md)
+- See [WORK.md](WORK.md) for the repair record and [CopilotStudio/README.md](../CopilotStudio/README.md)
   for deployment details.

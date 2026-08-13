@@ -316,8 +316,8 @@ stored.
 
 ![Microsoft Lists details for the corresponding ClinicPrep handoff record](SubmissionAssets/A8-sharepoint-handoff-record.png)
 
-- Repository evidence: [AUDIT.md](AUDIT.md), [TEST_CASE.md](TEST_CASE.md), [FLOW.md](FLOW.md),
-  [PLAN.md](PLAN.md), and [CopilotStudio/](CopilotStudio/).
+- Repository evidence: [AUDIT.md](../docs/AUDIT.md), [TEST_CASE.md](../docs/TEST_CASE.md), [FLOW.md](../docs/FLOW.md),
+  [PLAN.md](../docs/PLAN.md), and [CopilotStudio/](../CopilotStudio/).
 
 > Draft placeholders to resolve before submission: team details, sponsor-approved pricing/staff-cost
 > assumptions, final GitHub URL, and demo-video URL.

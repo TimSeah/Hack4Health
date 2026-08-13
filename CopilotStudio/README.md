@@ -1,6 +1,6 @@
 # Copilot Studio — Topic YAML Source
 
-YAML reference source for the 9 topics described in [PLAN.md](../PLAN.md) (Section 3). These
+YAML reference source for the 9 topics described in [PLAN.md](../docs/PLAN.md) (Section 3). These
 topics are deployed in the live "ClinicPrep Assistant" agent. `SetMultipleVariables` assignments
 and `BeginDialog` redirects in these files are reference/history only: those nodes had to be
 rebuilt in the low-code canvas because hand-authored YAML did not round-trip reliably.
@@ -42,7 +42,7 @@ Four unavailable external actions are replaced by typed `SetVariable` records. H
 | Billing Calculation | WELL2 returns SGD 0 payable; other codes return SGD 75. |
 | Create Handoff Record | Published agent flow writes to `ClinicPrep Handoff Queue` and returns `H4H-{SharePoint item ID}` with `Pending Verification`. |
 
-Evaluation cases and pass criteria are in [TEST_CASE.md](../TEST_CASE.md). Use **General
+Evaluation cases and pass criteria are in [TEST_CASE.md](../docs/TEST_CASE.md). Use **General
 quality** for the four mocked boundaries and a focused **Tool use** case for handoff.
 
 For isolated Evaluation runs, the overlapping legacy topics **Data Retrieval from CMS**,

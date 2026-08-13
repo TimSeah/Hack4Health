@@ -1,6 +1,6 @@
 # End-to-End Patient Process — Flowcharts
 
-Visualizes the current (as-is) clinic registration process from [1. Technical Problem Statement.md](1.%20Technical%20Problem%20Statement.md) and the proposed (to-be) flow using the `ClinicPrep Assistant` agent from [PLAN.md](PLAN.md).
+Visualizes the current (as-is) clinic registration process from [1. Technical Problem Statement.md](../ProblemStatement/1.%20Technical%20Problem%20Statement.md) and the proposed (to-be) flow using the `ClinicPrep Assistant` agent from [PLAN.md](PLAN.md).
 
 ## 1. As-Is Process (Current, Manual)
 
@@ -130,4 +130,4 @@ sequenceDiagram
 | Post-visit TPA portal re-entry | ~5–8 min manual re-entry (step 12) | Same data reused from `VisitTicket`, no re-typing |
 | Identity + e-card verification | ~1 min, manual | Unchanged — stays manual, in person (by design constraint) |
 
-See [README.md](README.md) for the full Technical Track requirements and [PLAN.md](PLAN.md) for the agent configuration that implements this flow.
+See [README.md](../README.md) for the full Technical Track requirements and [PLAN.md](PLAN.md) for the agent configuration that implements this flow.

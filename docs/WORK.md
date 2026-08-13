@@ -2,9 +2,9 @@
 
 ## Context
 
-The 9 topics in [CopilotStudio/topics/](CopilotStudio/topics/) were originally created by
+The 9 topics in [CopilotStudio/topics/](../CopilotStudio/topics/) were originally created by
 pasting hand-authored YAML into the Copilot Studio code editor (see
-[CopilotStudio/README.md](CopilotStudio/README.md)). The user reported the topics don't
+[CopilotStudio/README.md](../CopilotStudio/README.md)). The user reported the topics don't
 actually work / have multiple errors. Root cause: **two YAML node kinds don't reliably survive
 round-tripping through the code editor** even though they "parse" without a syntax error:
 
@@ -129,15 +129,15 @@ and avoid broad topic rewrites unless a change directly improves judging evidenc
 
 ### Latest progress
 
-- [x] First four-page draft created: [TECHNICAL_TRACK_SUBMISSION.md](TECHNICAL_TRACK_SUBMISSION.md).
-- [x] Eight contextual evidence images captured under [SubmissionAssets/](SubmissionAssets/),
+- [x] First four-page draft created: [TECHNICAL_TRACK_SUBMISSION.md](../Submission/TECHNICAL_TRACK_SUBMISSION.md).
+- [x] Eight contextual evidence images captured under [SubmissionAssets/](../Submission/SubmissionAssets/),
    including the live `H4H-4` conversation and corresponding SharePoint record.
 - [x] Published `Create ClinicPrep Handoff Record` agent flow connected to Handoff Summary.
 - [x] Live agent run created and read back SharePoint item 4 with data-minimised fields and no raw
    identity number, date of birth, address, phone, or questionnaire data.
 - [ ] Remaining draft placeholders: team details, approved cost assumptions, final GitHub URL, and
    demo-video URL.
-- [x] PDF exported as [TECHNICAL_TRACK_SUBMISSION.pdf](TECHNICAL_TRACK_SUBMISSION.pdf): four-page
+- [x] PDF exported as [TECHNICAL_TRACK_SUBMISSION.pdf](../Submission/TECHNICAL_TRACK_SUBMISSION.pdf): four-page
    A4 main body plus six appendix pages. All ten pages were raster-inspected; the updated Mermaid
    architecture and contextual Copilot Studio/SharePoint screenshots are fully visible without
    clipping.
@@ -269,5 +269,5 @@ generic Copilot-generated scaffold topics, not part of this plan.
 
 - Plan: [PLAN.md](PLAN.md)
 - Topic YAML source (now known to be unreliable for `SetMultipleVariables`/`BeginDialog` —
-  treat as reference/history only, not as something to re-paste): [CopilotStudio/topics/](CopilotStudio/topics/)
-- Deployment notes and remaining action wiring: [CopilotStudio/README.md](CopilotStudio/README.md)
+  treat as reference/history only, not as something to re-paste): [CopilotStudio/topics/](../CopilotStudio/topics/)
+- Deployment notes and remaining action wiring: [CopilotStudio/README.md](../CopilotStudio/README.md)
