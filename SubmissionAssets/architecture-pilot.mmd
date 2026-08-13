@@ -5,12 +5,13 @@ flowchart LR
     C --> L[Patient Lookup Flow]
     C --> E[Eligibility Rules Flow]
     C --> B[Billing Flow]
-    C --> H[Handoff Flow]
+    C --> H[Power Automate Handoff Flow]
     D --> DV[(Dataverse)]
     L --> DV
     E --> DV
     B --> DV
-    H --> DV
+    H --> SP[(SharePoint handoff queue - live)]
+    SP --> S
     DV --> S[Staff verification work queue]
     S --> CA[Clinic Assist / clinic system]
     S -. approved clinical workflow only .-> N[NEHR]

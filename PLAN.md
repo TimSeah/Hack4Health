@@ -190,7 +190,7 @@ Add as generative-answers knowledge (read-only, for Q&A like "what does WELL2 co
   the refreshed Topics overview.
 - The live Test panel verifies Greeting -> Visit Type Router -> Document Intake routing and
   correct capture of `Global.VisitType`.
-- The five unavailable actions use deterministic in-topic mock records, allowing Evaluation to
+- Four unavailable actions use deterministic in-topic mock records, allowing Evaluation to
   run without external APIs. Replace these records with Power Automate actions before production.
 - Evaluation-ready cases are documented in [TEST_CASE.md](TEST_CASE.md).
 - See [WORK.md](WORK.md) for the repair record and [CopilotStudio/README.md](CopilotStudio/README.md)

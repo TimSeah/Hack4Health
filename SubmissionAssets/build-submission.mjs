@@ -12,7 +12,7 @@ let markdown = readFileSync(sourcePath, "utf8");
 
 markdown = markdown.replace(
   /```mermaid[\s\S]*?```/,
-  `<figure class="architecture-figure">\n<img src="SubmissionAssets/architecture-pilot.svg" alt="Target pilot architecture connecting patients, ClinicPrep Assistant, Power Automate flows, Dataverse, staff verification, Clinic Assist and NEHR">\n<figcaption>Target pilot architecture. The hackathon prototype implements the Copilot Studio and knowledge layers; action boundaries are deterministic mocks.</figcaption>\n</figure>`
+  `<figure class="architecture-figure">\n<img src="SubmissionAssets/architecture-pilot.svg" alt="ClinicPrep architecture with four target flows using Dataverse and a live Power Automate handoff using SharePoint">\n<figcaption>Hybrid prototype and target architecture. Handoff is live through Power Automate and SharePoint; four upstream action boundaries remain deterministic mocks.</figcaption>\n</figure>`
 );
 
 markdown = markdown.replace(

@@ -1,6 +1,6 @@
 # ClinicPrep Assistant - Hack4Health Audit
 
-Audit date: 12 August 2026
+Audit date: 13 August 2026
 
 Scope: the live `ClinicPrep Assistant` in Microsoft Copilot Studio, repository topic references,
 Evaluation results, the Technical Problem Statement, questionnaire field reference, and the
@@ -12,10 +12,10 @@ The hackathon goal is **achieved as a functional mock prototype**, but it is **n
 solution or submission**.
 
 The Copilot Studio implementation demonstrates the intended patient journey, safety boundaries,
-registration pre-fill, deterministic package matching, billing, and staff-verification handoff.
-However, the central integrations are simulated, the questionnaires cover only a representative
-subset, the agent is not published, and several judging/submission requirements remain partial or
-missing.
+registration pre-fill, deterministic package matching, billing, and a real SharePoint-backed
+staff-verification handoff. Four upstream action boundaries remain simulated, the questionnaires
+cover only a representative subset, the agent is not published, and several judging/submission
+requirements remain partial or missing.
 
 ## Live Copilot Studio Results
 
@@ -31,6 +31,8 @@ missing.
 - Seven knowledge entries are ready, including the Parkway Shenton website, sample medical chits,
   questionnaire reference, and synthetic datasets.
 - File upload support is enabled.
+- The published `Create ClinicPrep Handoff Record` agent flow writes a minimal record to the
+    SharePoint `ClinicPrep Handoff Queue` and returns its item ID as an `H4H-{ID}` reference.
 - Two eight-case Evaluation sets are present and completed.
 
 ### Evaluation evidence
@@ -46,18 +48,19 @@ not be weakened merely to increase this score.
 
 ## Critical Findings
 
-### 1. Core automation is simulated
+### 1. Four core action boundaries are simulated
 
-The live Tools page says **Create your first tool**. Document parsing, patient lookup, eligibility,
-billing, and handoff creation are deterministic in-topic records rather than Power Automate tools.
-Consequently, the prototype does not prove real API calls, action selection, connector failure
-handling, persistence, or audit logging.
+Document parsing, patient lookup, eligibility, and billing remain deterministic in-topic records.
+Handoff creation is now a published Power Automate agent flow using the SharePoint connector. A live
+agent run returned `H4H-4`, and SharePoint item 4 was read back successfully. The prototype therefore
+proves one real action/persistence boundary, but not the other four production integrations.
 
-### 2. No operational data persistence exists
+### 2. Operational persistence is minimal
 
-The planned Dataverse `Patients`, `CoverageRules`, `Questionnaires`, `VisitTickets`, and `AuditLog`
-contracts are architectural only. PDPA acknowledgement, questionnaire responses, confidence,
-ticket state, and action history are not persisted or timestamped.
+The SharePoint handoff queue persists timestamped administrative records with visit, claimed name,
+package, payable amount, currency, and verification status. The verified record excludes identity
+number, date of birth, address, phone, and questionnaire data. Planned Dataverse `Patients`,
+`CoverageRules`, `Questionnaires`, `VisitTickets`, and `AuditLog` contracts remain architectural.
 
 ### 3. Questionnaire coverage is incomplete
 
@@ -73,11 +76,12 @@ Successful document parsing normally returns EVWPA/WELL2. Eligibility is a flat 
 is SGD 0 for WELL2 or SGD 75 otherwise. CHAS tiers, alternative insurers/packages, age/gender
 rules, occupational hazard panels, add-ons, and itemised estimates are not demonstrated.
 
-### 5. Escalation is not a real staff handoff
+### 5. The handoff queue is real but not yet operationally routed
 
-The fallback topic explains that staff will help and then ends the conversation. It is not connected
-to Omnichannel, Teams, a callback queue, email, or another engagement hub. Conversation context is
-therefore not delivered to a staff work queue.
+The normal handoff path creates a SharePoint queue record and gives the patient a matching reference.
+The fallback topic still only explains that staff will help and ends the conversation; no
+Omnichannel, Teams, callback, email notification, ownership assignment, or service-level workflow is
+configured.
 
 ### 6. The agent is not deployed
 
@@ -108,12 +112,11 @@ The General Health synthetic CSV appears twice, with one copy associated with `N
 Registration Agent`. This duplication should be removed or clearly justified. The Technical
 Problem Statement is not present as a knowledge source despite being listed in the plan.
 
-### 10. The formal submission package is missing
+### 10. The submission package still has team-owned gaps
 
-There is no consolidated maximum-four-page Technical Track submission. Team information, a
-200-word executive summary, final architecture presentation, implementation timeline, resource and
-cost assumptions, multi-clinic scalability narrative, screenshots, poster, and demo video are not
-assembled into submission artifacts.
+A four-page Technical Track draft, appendix screenshots, and validated PDF now exist. Team
+information, approved pricing/staff-cost assumptions, final repository URL, demo script/video, and
+judge-accessible channel remain outstanding.
 
 ## Core Task Coverage
 
@@ -134,7 +137,7 @@ assembled into submission artifacts.
 | --- | ---: | --- | --- |
 | Problem Understanding | 20 | **Met** | Clear workflow, root causes, 23-32 minute baseline, and duplicate-entry problem. |
 | Operational Impact | 20 | **Partial** | Impact pathway is clear, but expected time/cost/error savings are not validated or fully quantified. |
-| Technical Feasibility & Integration | 15 | **Partial** | Strong Copilot Studio prototype; no tools, Dataverse, Clinic Assist/NEHR, or TPA integration. |
+| Technical Feasibility & Integration | 15 | **Partial to strong** | One real Power Automate/SharePoint tool is proven; document, patient, eligibility, billing, Dataverse, Clinic Assist/NEHR, and TPA integrations remain future work. |
 | Innovation | 15 | **Partial to strong** | Pre-counter document interpretation and reuse of captured data are compelling, but differentiation is not written. |
 | User Experience | 10 | **Partial** | Key journeys work internally; no published channel, accessibility evidence, or complete form experience. |
 | Governance & Safety | 10 | **Partial** | Entra authentication and human oversight are strong; no audit trail and live generative settings are too permissive. |
@@ -147,7 +150,7 @@ Evidence-based current estimate: **55-65/100**, not an official judge score.
 | Required section/artifact | Status |
 | --- | --- |
 | Team information | Missing |
-| Executive summary | Missing as a submission-ready section |
+| Executive summary | Drafted in the four-page submission |
 | Problem understanding | Strong source material; needs compression |
 | Proposed AI solution | Strong source material; needs submission formatting |
 | Technical architecture | Partial; live/mock boundary and conceptual integrations must be explicit |
@@ -155,16 +158,16 @@ Evidence-based current estimate: **55-65/100**, not an official judge score.
 | Feasibility, timeline, resources, dependencies | Missing/partial |
 | Governance and safety | Partial; implementation limitations must be disclosed |
 | Parkway Shenton/IHH scalability | Missing/partial |
-| Four-page final document | Missing |
-| Appendix screenshots | Missing except one internal repair screenshot |
+| Four-page final document | Drafted and exported; team placeholders remain |
+| Appendix screenshots | Eight contextual evidence images captured |
 | Demo video/poster | Missing |
 
 ## Conclusion
 
 ClinicPrep Assistant is a credible **hackathon prototype** and should be presented honestly as one.
-The strongest 24-hour strategy is to polish and evidence the working prototype, add one credible
-tool/persistence integration if tenant access permits, harden safety, publish a demo channel, and
-assemble the required submission. Attempting full production integration or every questionnaire
-field before the deadline would add regression risk without proportionate judging value.
+The strongest remaining strategy is to harden safety settings and wording, add a focused Tool use
+evaluation, publish a controlled demo channel if permitted, and finish team-owned submission fields
+and video evidence. Attempting full production integration or every questionnaire field before the
+deadline would add regression risk without proportionate judging value.
 
 See [WORK.md](WORK.md) for the time-boxed submission sprint.

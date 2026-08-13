@@ -26,9 +26,9 @@ and obtains a handoff reference. Unclear documents, missing eligibility context,
 medical questions are escalated rather than guessed.
 
 The live prototype contains nine enabled, error-free topics, curated synthetic knowledge, Entra ID
-authentication, and two eight-case Evaluation sets. Five external actions are represented by typed,
-deterministic mocks because production connectors were unavailable; the architecture replaces these
-with Power Automate and Dataverse. The corrected Core Conversations run and Safety Boundaries run each
+authentication, two eight-case Evaluation sets, and a published Power Automate handoff tool. Four
+upstream actions remain typed deterministic mocks; the live handoff writes a minimal SharePoint queue
+record and returns its item ID as the patient reference. The corrected Core Conversations run and Safety Boundaries run each
 scored 63% under General quality. Three conversation failures reflect intentional safety escalation,
 not fabricated answers. The result is a credible, human-supervised prototype with a practical path to a
 controlled clinic pilot.
@@ -89,8 +89,9 @@ missing-context cases enter a review path instead of receiving a guessed answer.
 
 ### 6. Technical Architecture
 
-The diagram below is the **target pilot architecture**. The current hackathon prototype implements
-the Copilot Studio and knowledge layers; its five action boundaries are deterministic mocks.
+The diagram below combines the **implemented prototype boundary** with the target pilot path. The
+current prototype implements Copilot Studio, curated knowledge, four deterministic action mocks, and
+one real Power Automate/SharePoint handoff.
 
 ```mermaid
 flowchart LR
@@ -100,12 +101,13 @@ flowchart LR
     C --> L[Patient Lookup Flow]
     C --> E[Eligibility Rules Flow]
     C --> B[Billing Flow]
-    C --> H[Handoff Flow]
+   C --> H[Power Automate Handoff Flow]
     D --> DV[(Dataverse)]
     L --> DV
     E --> DV
     B --> DV
-    H --> DV
+   H --> SP[(SharePoint handoff queue - live)]
+   SP --> S
     DV --> S[Staff verification work queue]
     S --> CA[Clinic Assist / clinic system]
     S -. approved clinical workflow only .-> N[NEHR]
@@ -118,7 +120,7 @@ flowchart LR
 | Document parsing | Typed EVWPA/WELL2 mock with confidence branch | Power Automate plus Azure AI Document Intelligence or approved multimodal model |
 | Patient/eligibility | Deterministic found/not-found and package mocks | Power Automate querying Dataverse/approved clinic APIs |
 | Billing | Deterministic covered/payable record | Rules flow using versioned package and coverage tables |
-| Handoff | Deterministic reference | Dataverse `VisitTicket`, staff queue, timestamp and audit record |
+| Handoff | Published Power Automate flow creates a minimal SharePoint queue row and returns its item ID | Dataverse `VisitTicket`, assigned staff queue, timestamp and complete audit record |
 | Security | Microsoft Entra ID; multi-tenant access disabled | Least-privilege service principals, row-level access and retention controls |
 
 The proposed Dataverse model contains `Patients`, `CoverageRules`, `Questionnaires`, `VisitTickets`,
@@ -133,8 +135,9 @@ facts. Any NEHR exchange remains within authorised clinical workflows after huma
 
 The nine required topics are enabled with no listed topic errors. The prototype demonstrates document
 confirmation, returning and new-patient registration, safe escalation, questionnaire branching,
-billing, and handoff using synthetic data. It is not yet published, has no live agent tools, and uses
-representative questionnaire fields. These are disclosed limitations, not production claims.
+billing, and a live SharePoint-backed handoff using synthetic data. It is not yet published to an
+external channel, has four mocked action boundaries, and uses representative questionnaire fields.
+These are disclosed limitations, not production claims.
 
 <div style="page-break-after: always;"></div>
 
@@ -223,8 +226,8 @@ support.
 The current prototype already enforces pending-verification language and safe escalation. Its live
 configuration still uses GPT-5 Auto (Preview), Low moderation, ungrounded responses and public web
 search. Before judging/pilot use, it must move to an approved stable model, strengthen moderation,
-disable ungrounded/public-web answers, connect a real audit trail, and validate all patient-facing
-safety text.
+disable ungrounded/public-web answers, extend the minimal SharePoint record into a complete audit
+trail, and validate all patient-facing safety text.
 
 ### 10. Scalability Across Parkway Shenton and IHH
 
@@ -255,7 +258,7 @@ not weakened to optimise a generic score. Two genuine safety wording gaps are be
 retested.
 
 ClinicPrep Assistant demonstrates that pre-registration can be orchestrated safely in Copilot Studio
-while keeping physical verification with staff. The recommendation is a limited, synthetic/sandbox
+and can create a real data-minimised staff handoff while keeping physical verification with staff. The recommendation is a limited, synthetic/sandbox
 pilot focused on measurable counter-time reduction, data quality, override rates and safe escalation.
 Production deployment is contingent on real integrations, governance approval and evidence from that
 pilot.
@@ -298,12 +301,20 @@ connector error.
 
 ![Conversation detail showing returning-patient registration path](SubmissionAssets/A5-returning-patient-registration.png)
 
-### Figure A6 - Staff handoff contract
+### Figure A6 - Live SharePoint-backed handoff
 
-The Handoff Summary topic produces `MOCK-H4H-001` and explicitly retains in-person identity and
-e-card/insurance-card verification.
+The agent calls the published handoff flow, displays `H4H-4`, and retains the required in-person
+identity and e-card/insurance-card verification notice.
 
-![Handoff Summary topic showing queue reference and pending in-person verification notice](SubmissionAssets/A6-handoff-summary.png)
+![Live Copilot Studio conversation showing SharePoint-backed queue reference H4H-4](SubmissionAssets/A7-live-sharepoint-handoff.png)
+
+### Figure A7 - Data-minimised SharePoint queue record
+
+The corresponding SharePoint record contains administrative handoff fields and `Pending
+Verification`; no identity number, date of birth, address, phone, or medical questionnaire data is
+stored.
+
+![Microsoft Lists details for the corresponding ClinicPrep handoff record](SubmissionAssets/A8-sharepoint-handoff-record.png)
 
 - Repository evidence: [AUDIT.md](AUDIT.md), [TEST_CASE.md](TEST_CASE.md), [FLOW.md](FLOW.md),
   [PLAN.md](PLAN.md), and [CopilotStudio/](CopilotStudio/).

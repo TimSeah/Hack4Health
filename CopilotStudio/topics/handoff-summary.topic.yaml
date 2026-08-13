@@ -1,5 +1,5 @@
 # Handoff Summary — plan §3.8 (always ends here)
-# New topic. Paste this whole file into the topic's code editor.
+# Live canvas source read back from Copilot Studio on 13 August 2026.
 kind: AdaptiveDialog
 beginDialog:
   kind: OnRecognizedIntent
@@ -10,25 +10,49 @@ beginDialog:
       - what happens next
       - summary please
   actions:
-    # Mock-mode replacement for Create Handoff Record.
-    - kind: SetVariable
-      id: setVariable_U157rp
-      variable: Topic.HandoffResult
-      value: "={ticketNumber: \"MOCK-H4H-001\"}"
+    - kind: SetMultipleVariables
+      id: setVariable_C8IkLK
+      assignments:
+        - variable: Global.VisitType
+          value: =Text(Global.VisitPurpose)
+
+        - variable: Global.CompanyOrTPACode
+          value: =Coalesce(Global.CompanyOrTPACode, "Not applicable")
+
+        - variable: Global.MatchedPackageCode
+          value: =Coalesce(Global.MatchedPackageCode, "Not applicable")
+
+        - variable: Global.PayableAmount
+          value: =Coalesce(Global.PayableAmount, 0)
+
+        - variable: Global.MatchedPackageName
+          value: =Substitute(Coalesce(Global.MatchedPackageName, "General consultation"), Char(34), "")
+
+        - variable: Global.BillingCurrency
+          value: =Substitute(Coalesce(Global.BillingCurrency, "SGD"), Char(34), "")
+
+    - kind: InvokeFlowAction
+      id: invokeFlowAction_F0WqYy
+      input:
+        binding:
+          number: =Global.PayableAmount
+          text: =Global.VisitType
+          text_1: =Global.FullName
+          text_2: =Global.CompanyOrTPACode
+          text_3: =Global.MatchedPackageCode
+          text_4: =Global.MatchedPackageName
+          text_5: =Global.BillingCurrency
+
+      output:
+        binding:
+          ticket_number: Topic.Ticketnumber
+          verification_status: Topic.Verificationstatus
+
+      flowId: 93526f13-ea96-f111-b8dc-7ced8dfec66f
 
     - kind: SendActivity
       id: sendHandoffSummary
-      activity: |-
-        Here's your pre-registration summary — please show this to the front-desk staff:
-
-        - Visit type: {Global.VisitType}
-        - Name (as claimed): {Global.FullName}
-        - ID type: {Global.IDType}
-        - Matched package/coverage: {Global.MatchedPackageName} ({Global.MatchedPackageCode})
-        - Estimated cost: {Global.BillingCurrency} {Global.PayableAmount}
-        - Queue reference: {Topic.HandoffResult.ticketNumber}
-
-        Awaiting in-person identity verification and e-card/insurance card check by staff.
+      activity: "{Concatenate(\"Here is your pre-registration summary - please show this to the front-desk staff:\", Char(10), Char(10), \"- Visit type: \", Global.VisitType, Char(10), \"- Name (as claimed): \", Global.FullName, Char(10), \"- Matched package/coverage: \", Global.MatchedPackageName, \" (\", Global.MatchedPackageCode, \")\", Char(10), \"- Estimated cost: \", Global.BillingCurrency, \" \", Text(Global.PayableAmount), Char(10), \"- Queue reference: H4H-\", Topic.Ticketnumber, Char(10), \"- Status: \", Topic.Verificationstatus, Char(10), Char(10), \"Awaiting in-person identity verification and e-card/insurance card check by staff.\")}"
 
     - kind: EndDialog
       id: endHandoffSummary

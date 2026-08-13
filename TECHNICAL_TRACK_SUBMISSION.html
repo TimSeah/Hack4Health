@@ -115,9 +115,9 @@ pre-filled registration details, completes a focused health questionnaire, recei
 and obtains a handoff reference. Unclear documents, missing eligibility context, declined consent, and
 medical questions are escalated rather than guessed.</p>
 <p>The live prototype contains nine enabled, error-free topics, curated synthetic knowledge, Entra ID
-authentication, and two eight-case Evaluation sets. Five external actions are represented by typed,
-deterministic mocks because production connectors were unavailable; the architecture replaces these
-with Power Automate and Dataverse. The corrected Core Conversations run and Safety Boundaries run each
+authentication, two eight-case Evaluation sets, and a published Power Automate handoff tool. Four
+upstream actions remain typed deterministic mocks; the live handoff writes a minimal SharePoint queue
+record and returns its item ID as the patient reference. The corrected Core Conversations run and Safety Boundaries run each
 scored 63% under General quality. Three conversation failures reflect intentional safety escalation,
 not fabricated answers. The result is a credible, human-supervised prototype with a practical path to a
 controlled clinic pilot.</p>
@@ -167,11 +167,12 @@ verification.</li>
 then confirm the visit in the clinic system.</li>
 </ol>
 <h3>6. Technical Architecture</h3>
-<p>The diagram below is the <strong>target pilot architecture</strong>. The current hackathon prototype implements
-the Copilot Studio and knowledge layers; its five action boundaries are deterministic mocks.</p>
+<p>The diagram below combines the <strong>implemented prototype boundary</strong> with the target pilot path. The
+current prototype implements Copilot Studio, curated knowledge, four deterministic action mocks, and
+one real Power Automate/SharePoint handoff.</p>
 <figure class="architecture-figure">
-<img src="SubmissionAssets/architecture-pilot.svg" alt="Target pilot architecture connecting patients, ClinicPrep Assistant, Power Automate flows, Dataverse, staff verification, Clinic Assist and NEHR">
-<figcaption>Target pilot architecture. The hackathon prototype implements the Copilot Studio and knowledge layers; action boundaries are deterministic mocks.</figcaption>
+<img src="SubmissionAssets/architecture-pilot.svg" alt="ClinicPrep architecture with four target flows using Dataverse and a live Power Automate handoff using SharePoint">
+<figcaption>Hybrid prototype and target architecture. Handoff is live through Power Automate and SharePoint; four upstream action boundaries remain deterministic mocks.</figcaption>
 </figure><table>
 <thead>
 <tr>
@@ -207,8 +208,8 @@ the Copilot Studio and knowledge layers; its five action boundaries are determin
 </tr>
 <tr>
 <td>Handoff</td>
-<td>Deterministic reference</td>
-<td>Dataverse <code>VisitTicket</code>, staff queue, timestamp and audit record</td>
+<td>Published Power Automate flow creates a minimal SharePoint queue row and returns its item ID</td>
+<td>Dataverse <code>VisitTicket</code>, assigned staff queue, timestamp and complete audit record</td>
 </tr>
 <tr>
 <td>Security</td>
@@ -225,8 +226,9 @@ facts. Any NEHR exchange remains within authorised clinical workflows after huma
 <h3>Prototype evidence and limitations</h3>
 <p>The nine required topics are enabled with no listed topic errors. The prototype demonstrates document
 confirmation, returning and new-patient registration, safe escalation, questionnaire branching,
-billing, and handoff using synthetic data. It is not yet published, has no live agent tools, and uses
-representative questionnaire fields. These are disclosed limitations, not production claims.</p>
+billing, and a live SharePoint-backed handoff using synthetic data. It is not yet published to an
+external channel, has four mocked action boundaries, and uses representative questionnaire fields.
+These are disclosed limitations, not production claims.</p>
 <div style="page-break-after: always;"></div><h2>Page 3 of 4 - Operational Impact and Feasibility</h2>
 <h3>7. Operational Impact</h3>
 <p>The challenge baseline is <strong>23-32 administrative minutes per patient</strong>. Within that total, registration,
@@ -344,8 +346,8 @@ periodic rule review and a named owner for coverage-table changes.</li>
 <p>The current prototype already enforces pending-verification language and safe escalation. Its live
 configuration still uses GPT-5 Auto (Preview), Low moderation, ungrounded responses and public web
 search. Before judging/pilot use, it must move to an approved stable model, strengthen moderation,
-disable ungrounded/public-web answers, connect a real audit trail, and validate all patient-facing
-safety text.</p>
+disable ungrounded/public-web answers, extend the minimal SharePoint record into a complete audit
+trail, and validate all patient-facing safety text.</p>
 <h3>10. Scalability Across Parkway Shenton and IHH</h3>
 <p>The design separates reusable orchestration from local configuration. A centrally governed
 <code>CoverageRules</code> service can version insurer, TPA, employer and package mappings while each clinic owns
@@ -369,7 +371,7 @@ General quality treated as non-answers; this behavior should be judged against e
 not weakened to optimise a generic score. Two genuine safety wording gaps are being corrected and
 retested.</p>
 <p>ClinicPrep Assistant demonstrates that pre-registration can be orchestrated safely in Copilot Studio
-while keeping physical verification with staff. The recommendation is a limited, synthetic/sandbox
+and can create a real data-minimised staff handoff while keeping physical verification with staff. The recommendation is a limited, synthetic/sandbox
 pilot focused on measurable counter-time reduction, data quality, override rates and safe escalation.
 Production deployment is contingent on real integrations, governance approval and evidence from that
 pilot.</p>
@@ -398,10 +400,15 @@ labels the required refusal as a failure, illustrating why explicit safety crite
 connector error.</p>
 <p><img src="SubmissionAssets/A5-returning-patient-registration.png" alt="Conversation detail showing returning-patient registration path"></p>
 </section>
-<section class="appendix-figure"><h3>Figure A6 - Staff handoff contract</h3>
-<p>The Handoff Summary topic produces <code>MOCK-H4H-001</code> and explicitly retains in-person identity and
-e-card/insurance-card verification.</p>
-<p><img src="SubmissionAssets/A6-handoff-summary.png" alt="Handoff Summary topic showing queue reference and pending in-person verification notice"></p>
+<section class="appendix-figure"><h3>Figure A6 - Live SharePoint-backed handoff</h3>
+<p>The agent calls the published handoff flow, displays <code>H4H-4</code>, and retains the required in-person
+identity and e-card/insurance-card verification notice.</p>
+<p><img src="SubmissionAssets/A7-live-sharepoint-handoff.png" alt="Live Copilot Studio conversation showing SharePoint-backed queue reference H4H-4"></p>
+</section>
+<section class="appendix-figure"><h3>Figure A7 - Data-minimised SharePoint queue record</h3>
+<p>The corresponding SharePoint record contains administrative handoff fields and <code>Pending Verification</code>; no identity number, date of birth, address, phone, or medical questionnaire data is
+stored.</p>
+<p><img src="SubmissionAssets/A8-sharepoint-handoff-record.png" alt="Microsoft Lists details for the corresponding ClinicPrep handoff record"></p>
 </section>
 <ul>
 <li>Repository evidence: <a href="AUDIT.md">AUDIT.md</a>, <a href="TEST_CASE.md">TEST_CASE.md</a>, <a href="FLOW.md">FLOW.md</a>,

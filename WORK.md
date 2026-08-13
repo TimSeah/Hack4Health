@@ -38,7 +38,7 @@ not the code editor. Full reliable click-by-click workflow is below.
 | Handoff Summary | `798f70c7-e80f-4b6a-a872-79610b04ca83` |
 | Escalation / Fallback | `5d869520-458f-4616-94fb-1e6ad5ab1f97` |
 
-## Status (repaired and reverified, 12 August 2026)
+## Status (repaired and reverified, 13 August 2026)
 
 All nine required topics now show **0 errors** in Topic checker and no error count in the refreshed
 Topics overview. All nine are enabled. Verification used a fully loaded page, repeated traversal
@@ -53,18 +53,51 @@ of each virtualized canvas until its height stabilized, and matching refreshed c
 | Eligibility & Package Matching | **Verified clean.** Rebuilt `Global.MatchedPackageCode`, `Global.MatchedPackageName`, and `Global.CoverageRuleSummary`; no-match redirects to **Escalation / Fallback**. |
 | Consent Questionnaire Pre-fill | **Verified clean.** `Global.VisitType` conditions resolve; PDPA decline redirects to **Escalation / Fallback** and acknowledgement redirects to **Billing Estimate**. |
 | Billing Estimate | **Verified clean.** `Global.PayableAmount` and `Global.BillingCurrency` assignments are present; redirect resolves to **Handoff Summary**. |
-| Handoff Summary | **Verified clean.** All upstream global references resolve and the in-person verification notice remains present. |
+| Handoff Summary | **Verified clean with a live tool.** The topic calls `Create ClinicPrep Handoff Record`, writes a data-minimised SharePoint row, returns `H4H-{item ID}`, and retains the in-person verification notice. |
 | Escalation / Fallback | **Verified clean.** Staff-handoff message and End current topic are present. |
 
 ## Runtime test result
 
-The five unavailable external actions have been replaced with typed, deterministic mock records.
+Four unavailable external actions remain typed, deterministic mock records. `Create Handoff Record`
+is now a published agent flow backed by the SharePoint list `ClinicPrep Handoff Queue`.
 No `REPLACE-ME` or `HttpRequestAction` remains in the nine local topic references. Live tests
 verify both:
 
 - EVWPA document extraction -> confirmation with no URI error.
 - `illegible` / `ambiguous` document -> low-confidence refusal and staff escalation.
 - Returning patient `S4744854C` -> synthetic pre-fill with no lookup error.
+- General Consult -> live flow -> queue reference `H4H-4` -> SharePoint item 4 with `Pending
+   Verification` status.
+
+The final SharePoint readback contained VisitType, PatientName, package/coverage, currency, amount,
+and verification status. It did not contain the submitted identity number, date of birth, address,
+or phone number. Handoff Topic checker and Flow checker both report 0 errors and 0 warnings.
+
+### SharePoint handoff integration closure (completed 13 August 2026)
+
+**Verdict: complete and manually validated end to end.**
+
+- SharePoint list: `ClinicPrep Handoff Queue`, stored under the authenticated user's **My lists**
+   area to avoid placing hackathon records in an unrelated team/course site.
+- Published agent flow: `Create ClinicPrep Handoff Record`, flow ID
+   `93526f13-ea96-f111-b8dc-7ced8dfec66f`.
+- Live Handoff Summary uses `InvokeFlowAction`; the deterministic handoff mock is no longer present.
+- The action normalises legitimate General Consult blanks before invocation and returns the
+   SharePoint item ID plus `Pending Verification`.
+- Final live run returned `H4H-4`; Microsoft Lists item 4 was reopened on 13 August and confirmed:
+   `General Consult`, `Singh Amir`, `Not applicable`, `NIL`, `SGD`, `50`, and
+   `Pending Verification`.
+- The list contract excludes raw identity number, date of birth, address, phone, medical history,
+   and questionnaire responses. `IDTypeAsReported`, `StaffReviewReason`, and `MissingItems` were
+   blank in the verified record.
+- Live Handoff Topic checker was reopened after the final save and reports **no errors or warnings**
+   and `Errors (0)`. The published flow checker reports **0 errors / 0 warnings**.
+- Source, tests, audit, architecture, screenshots, HTML, and PDF now distinguish the one live
+   SharePoint handoff from the four remaining mocked action boundaries.
+
+Manual behavior and data-contract testing are complete. The focused `T01` **Tool use Evaluation**
+set/run is intentionally recorded as the next validation step; it has not yet received a formal
+Copilot Studio score.
 
 The refreshed Topics overview remains at 0 errors and all nine required topics are enabled.
 See [TEST_CASE.md](TEST_CASE.md) for Evaluation-ready conversations and single responses.
@@ -78,6 +111,8 @@ Evaluation sets created and started:
 
 - `ClinicPrep Mock - Safety Boundaries`: 8 Single response cases, General quality.
 - `ClinicPrep Mock - Core Conversations`: 8 Conversation cases, General quality.
+- `ClinicPrep Live - Handoff Tool`: focused Tool use case specified in [TEST_CASE.md](TEST_CASE.md);
+   Evaluation set/run not yet created.
 
 Evaluation results: Safety Boundaries scored 63% (5 pass, 3 fail). Core Conversations initially
 scored 50% (4 pass, 4 fail); corrected rerun `260812_1543` scored 63% (5 pass, 3 fail).
@@ -95,80 +130,57 @@ and avoid broad topic rewrites unless a change directly improves judging evidenc
 ### Latest progress
 
 - [x] First four-page draft created: [TECHNICAL_TRACK_SUBMISSION.md](TECHNICAL_TRACK_SUBMISSION.md).
-- [x] Six live Copilot Studio appendix figures captured as contextual UI panels under
-   [SubmissionAssets/](SubmissionAssets/): topic health, both complete Evaluation runs, safe
-   document escalation, returning-patient registration, and handoff summary.
+- [x] Eight contextual evidence images captured under [SubmissionAssets/](SubmissionAssets/),
+   including the live `H4H-4` conversation and corresponding SharePoint record.
+- [x] Published `Create ClinicPrep Handoff Record` agent flow connected to Handoff Summary.
+- [x] Live agent run created and read back SharePoint item 4 with data-minimised fields and no raw
+   identity number, date of birth, address, phone, or questionnaire data.
 - [ ] Remaining draft placeholders: team details, approved cost assumptions, final GitHub URL, and
    demo-video URL.
 - [x] PDF exported as [TECHNICAL_TRACK_SUBMISSION.pdf](TECHNICAL_TRACK_SUBMISSION.pdf): four-page
-   A4 main body plus five appendix pages. All pages were raster-inspected; the Mermaid architecture
-   and contextual Copilot Studio screenshots are fully visible without clipping.
+   A4 main body plus six appendix pages. All ten pages were raster-inspected; the updated Mermaid
+   architecture and contextual Copilot Studio/SharePoint screenshots are fully visible without
+   clipping.
 
 ### Definition of submission-ready
 
 - [x] Maximum-four-page Technical Track submission exported to PDF, excluding appendix.
 - [ ] Team information and contact details supplied by the team.
-- [ ] Claims clearly distinguish live behavior, deterministic mock behavior, and production roadmap.
+- [x] Claims clearly distinguish live behavior, deterministic mock behavior, and production roadmap.
 - [x] At least five legible appendix screenshots cover the demonstrated journey and Evaluation results.
 - [ ] A repeatable two-to-three-minute demo script and short recorded walkthrough exist.
 - [ ] The agent is published to one judge-accessible test channel, if tenant policy permits.
 - [ ] Safety settings are hardened and the two genuine safety-response gaps are retested.
 - [ ] No topic errors, connector errors, broken redirects, or exposed internal placeholder text remain.
 
-### P0 - highest judging return (next 4-6 hours)
+### Remaining priority order for the evening
 
-1. **Create the submission draft.** Build a concise four-page document from `README.md`,
-   `PLAN.md`, `FLOW.md`, `AUDIT.md`, and `TEST_CASE.md` with placeholders only for team-supplied
-   facts. Include the required 200-word executive summary, problem, solution, architecture,
-   quantified impact, feasibility, governance, and scalability sections.
-2. **Quantify defensible impact and cost assumptions.** Convert the 23-32 minute baseline into a
-   conservative target range, staff-hours saved for 40 patients, and a clearly labelled pilot
-   measurement plan. Do not present mock Evaluation scores as operational savings.
-3. **Harden live generative settings.** Prefer a stable model over GPT-5 Auto (Preview); raise
-   moderation if the tenant allows it; disable ungrounded responses and public web search for the
-   judged healthcare workflow. Re-test happy and escalation paths after each change.
-4. **Fix the two genuine safety-response gaps.** Medication responses must explicitly direct the
-   user to a clinician/clinic staff before changing medication. Chest-pain responses must include
-   appropriate urgent or emergency-care guidance without diagnosing.
-5. **Clean presentation risks.** Rewrite the informal NRIC/FIN/passport entity description,
-   remove or justify the duplicate General Health knowledge file, and verify no disabled legacy
-   topic appears in the demo journey.
-
-### P1 - strengthen the live demonstration (following 6-8 hours)
-
-1. **Attempt one real Copilot Studio tool integration.** The best scoped candidate is `Create
-   Handoff Record`: use an agent flow to accept the summary, return a ticket, and write a minimal
-   timestamped record to Dataverse or SharePoint if permissions allow. Keep the other four
-   integrations explicitly mocked. Add one focused Tool use evaluation if the flow succeeds.
-2. **Improve the staff handoff summary.** Add document/eligibility confidence, allergy, missing
-   item, staff-review reason, and pending-verification fields without exposing unnecessary PII.
-3. **Expand only the most demonstrable questionnaire gaps.** Prioritise current medications,
-   drug allergies, present complaints, occupational screening type, family history, alcohol, and
-   exercise. Do not attempt every field in the full questionnaire schema before the deadline.
-4. **Publish a controlled demo channel.** Prefer Microsoft Teams or another Entra-authenticated
-   test channel. If publishing is blocked, document the tenant limitation and use the Test pane in
-   the recorded demo.
-5. **Run focused regression checks.** Re-run the Safety set and the corrected Core Conversation
-   set; preserve required escalation behavior even if General quality still calls it refusal.
-
-### P2 - evidence and packaging (final 6-8 hours)
-
-1. Capture appendix screenshots for: Greeting/Visit Type, document extraction confirmation,
-   returning and not-found registration, eligibility/billing, questionnaire declaration, handoff
-   reference, topic overview with zero errors, and Evaluation results.
-2. Prepare a two-to-three-minute demo script with one happy path and one safe-escalation path.
-3. Record the walkthrough, check that no personal notifications or unrelated tenant data appear,
-   and add the video/GitHub references to the appendix.
-4. Export the final submission to PDF, confirm the four-page main-body limit, proofread every
-   numeric claim, and verify all links and images.
+1. **Fill submission-owned placeholders.** Team name, institution, members/contact, approved
+   staff-cost assumptions, final GitHub URL, and demo-video URL require team input.
+2. **Harden live generative safety.** Prefer an approved stable model over GPT-5 Auto (Preview),
+   raise moderation if permitted, and disable ungrounded responses/public web search for the judged
+   workflow. Make one setting change at a time and regression-test after each.
+3. **Fix and retest the two genuine safety wording gaps.** Medication responses must explicitly
+   direct the user to a clinician/clinic staff before changing medication. Chest-pain responses
+   must include appropriate urgent/emergency-care guidance without diagnosing.
+4. **Run focused Evaluations.** Create/run `ClinicPrep Live - Handoff Tool` using `T01`, then rerun
+   Safety Boundaries and corrected Core Conversations after any safety setting/topic changes.
+5. **Publish a controlled demo channel.** Prefer Microsoft Teams or another Entra-authenticated
+   test channel. If tenant policy blocks publishing, record the limitation and use the Test pane.
+6. **Prepare the demo package.** Produce a repeatable two-to-three-minute script, record the happy
+   path plus safe escalation, verify no unrelated tenant data is visible, and update the video URL.
+7. **Only if time remains:** rewrite the informal NRIC entity description, remove/justify duplicate
+   knowledge, add high-value handoff flags, or extend selected questionnaire fields. Avoid broad
+   topic rewrites before submission.
 
 ### Work Copilot can cover autonomously
 
 - Draft and tighten the four-page submission and appendix text.
 - Produce conservative impact calculations, architecture wording, implementation timeline, risk
   register, governance section, scalability roadmap, demo script, and judge Q&A.
-- Apply scoped Copilot Studio safety/topic fixes, run focused Evaluations, and capture screenshots.
-- Attempt the handoff agent flow and controlled publication using the existing tenant permissions.
+- Apply scoped Copilot Studio safety/topic fixes and run focused Evaluations.
+- Maintain the verified SharePoint handoff flow and attempt controlled publication using existing
+   tenant permissions.
 - Keep `AUDIT.md`, `WORK.md`, and `TEST_CASE.md` aligned with verified outcomes.
 
 ### Team input required as early as possible
@@ -183,7 +195,8 @@ and avoid broad topic rewrites unless a change directly improves judging evidenc
 ### Explicitly out of scope before the deadline
 
 - Production Clinic Assist, NEHR, insurer/TPA, or real patient-data integration.
-- All five production-grade Power Automate flows and full Dataverse security design.
+- The four remaining production action flows, replacement of the personal SharePoint queue with an
+   assigned production work queue/Dataverse design, and full production security configuration.
 - Every field in both screening questionnaires.
 - Multilingual implementation, load testing, formal penetration testing, or PDPA certification.
 - Removing safe refusal/escalation behavior merely to improve General quality scores.

@@ -5,7 +5,7 @@ topics are deployed in the live "ClinicPrep Assistant" agent. `SetMultipleVariab
 and `BeginDialog` redirects in these files are reference/history only: those nodes had to be
 rebuilt in the low-code canvas because hand-authored YAML did not round-trip reliably.
 
-## Status: topic errors cleared (2026-08-12)
+## Status: topics clean; SharePoint handoff live (2026-08-13)
 
 All 9 required topics are enabled and show **0 errors** in both Topic checker and the refreshed
 Topics overview:
@@ -26,12 +26,13 @@ The live canvas redirects were recreated through **Topic management -> Go to ano
 do not re-paste the hand-authored `BeginDialog` GUIDs from these files.
 
 **Live-tested in the Test panel:** `Hi` triggers Greeting, both first-time branches route to
-Visit Type Router, and `Global.VisitType` is captured. Document extraction, low-confidence
-escalation, and returning-patient lookup run without external calls or URI errors.
+Visit Type Router, and the active journey captures `Global.VisitPurpose`. Document extraction,
+low-confidence escalation, and returning-patient lookup run without URI errors. Handoff Summary
+normalises the live variables, calls Power Automate, and returns a SharePoint-backed ticket.
 
-## Mock action mode
+## Hybrid mock/live action mode
 
-The unavailable external actions are replaced by typed `SetVariable` records:
+Four unavailable external actions are replaced by typed `SetVariable` records. Handoff is live:
 
 | Action | Mock behavior |
 | --- | --- |
@@ -39,10 +40,10 @@ The unavailable external actions are replaced by typed `SetVariable` records:
 | Patient Lookup | `S4744854C` returns the synthetic Tan Kai Xuan record; other IDs are not found. |
 | Eligibility Lookup | Existing company code returns WELL2 Comprehensive Screen; missing context escalates. |
 | Billing Calculation | WELL2 returns SGD 0 payable; other codes return SGD 75. |
-| Create Handoff Record | Returns `MOCK-H4H-001`. |
+| Create Handoff Record | Published agent flow writes to `ClinicPrep Handoff Queue` and returns `H4H-{SharePoint item ID}` with `Pending Verification`. |
 
 Evaluation cases and pass criteria are in [TEST_CASE.md](../TEST_CASE.md). Use **General
-quality**, not **Tool use**, while mock mode is active.
+quality** for the four mocked boundaries and a focused **Tool use** case for handoff.
 
 For isolated Evaluation runs, the overlapping legacy topics **Data Retrieval from CMS**,
 **First-time Visit Registration**, **Info Confirmation**, **Purpose of Visit**, and
@@ -51,12 +52,14 @@ conversation; split longer scenarios into focused cases.
 
 ## Still to do
 
-### 1. Replace mock records before production
+### 1. Replace the remaining mock records before production
 
-Build each flow in Power Automate (see
+Build the other four flows in Power Automate (see
 [Create an agent flow as a tool](https://learn.microsoft.com/microsoft-copilot-studio/advanced-flow-create)),
-then replace each mock `SetVariable` node with **Add an action -> Flow**. Add Tool use
-evaluations for action selection, input mapping, failure handling, and audit logging.
+then replace each mock `SetVariable` node with **Add an action -> Flow**. Expand Tool use
+evaluations for action selection, input mapping, failure handling, and audit logging. The current
+handoff flow is suitable for hackathon evidence but still needs production access control,
+retention, queue ownership, and monitoring.
 
 ### 2. Optional: upgrade closed-list fields from free text
 
