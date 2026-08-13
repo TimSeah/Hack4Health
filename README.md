@@ -1,8 +1,15 @@
+
 <p align="center">
-  <img src="Resources/Hack4Health_Primary_Healthcare_Innovation_Initiative.png" alt="Hack4Health 2026 — Primary Healthcare Innovation Initiative" width="640">
+  <video src="https://github.com/user-attachments/assets/9141a34d-998a-47a5-8383-999e7cb88d17" controls width="720" poster="https://img.youtube.com/vi/TqB2ibZvX5Y/hqdefault.jpg">
+    Your Markdown viewer doesn't support inline video playback — <a href="https://youtu.be/TqB2ibZvX5Y">watch the demo on YouTube</a> instead.
+  </video>
 </p>
 
 # ClinicPrep Assistant — Hack4Health 2026 Technical Track Submission
+
+<p align="center">
+  <img src="Resources/Hack4Health_Primary_Healthcare_Innovation_Initiative.png" alt="Hack4Health 2026 — Primary Healthcare Innovation Initiative">
+</p>
 
 **Automating pre-registration and eligibility verification so patients arrive pre-verified, and staff spend their time on people, not paperwork.**
 
